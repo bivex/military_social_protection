@@ -1,0 +1,48 @@
+```catala
+declaration scope HealthcareEntitlement:
+  input sm content Servicemember
+  input family_member content FamilyMember
+  input is_ato_participant content YesNo
+  input is_pow_survivor content YesNo
+  input is_war_participant content YesNo
+  input is_medical_need content YesNo
+  input requires_sanatorium content YesNo
+  input household_income_per_capita content money
+  input child_sick content YesNo
+  input child_hospitalization content YesNo
+  output free_military_medical_care content YesNo
+  output psychological_support content YesNo
+  output sanatorium_right content YesNo
+  output child_care_leave_medical content YesNo
+  output infertility_preservation_right content YesNo
+
+scope HealthcareEntitlement:
+  definition free_military_medical_care under condition
+    sm.status = ActiveServicemember or sm.status = ReservistOnTraining or sm.status = Conscript or sm.status = SpecialPeriod
+    or family_member_is_protected = Yes and no_public_hospital_in_residence_area = Yes
+    consequence equals Yes
+
+  definition psychological_support under condition
+    (is_ato_participant = Yes or actual_service_in_war_zones = Yes or is_war_participant = Yes) and is_pow_survivor = Yes
+    consequence equals Yes
+
+  definition reintegration_program_entitled under condition
+    unlawfully_deprived_liberty_and_recently_released = Yes
+    consequence equals Yes
+
+  definition sanatorium_right under condition
+    (sm.status = ActiveServicemember or sm.status = ReservistOnTraining or sm.status = Conscript or sm.status = SpecialPeriod) and not exceeded_once_per_year = Yes
+    consequence equals Yes
+
+  definition free_sanatorium_after_hospital under condition
+    post_stationary_treatment_per_military_medical_board = Yes
+    consequence equals Yes
+
+  definition child_care_leave_medical under condition
+    child_sick = Yes and child_age < 14
+    consequence equals Yes
+
+  definition infertility_preservation_right under condition
+    (sm.status = ActiveServicemember or sm.status = ReservistOnTraining or sm.status = Conscript or sm.status = SpecialPeriod) and war_time_participant = Yes
+    consequence equals Yes
+```

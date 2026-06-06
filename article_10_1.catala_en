@@ -1,0 +1,76 @@
+```catala
+declaration scope LeaveEntitlement:
+  input sm content Servicemember
+  input leave_year content integer
+  input current_year_discharge content YesNo
+  output annual_main_leave_days content integer
+  output annual_additional_leave_days content integer
+  output leave_pay_entitlement content YesNo
+  output travel_cost_covered content YesNo
+  output post_discharge_leave_granted content YesNo
+
+scope LeaveEntitlement:
+  definition annual_main_leave_days under condition
+    not (sm.is_basic_service = Yes or sm.is_academy_student = Yes)
+    consequence equals 30
+
+  definition annual_additional_leave_days under condition
+    (sm.status = ActiveServicemember or sm.status = ReservistOnTraining or sm.status = Conscript or sm.status = SpecialPeriod) and sm.is_basic_service = No
+    consequence equals CMU_determined_max_15_days
+
+  definition leave_pay_entitlement under condition
+    mobilization_declared = Yes or martial_law_declared = Yes or defense_minister_decision = Yes
+    consequence equals Yes
+
+  definition travel_cost_covered under condition
+    mobilization_declared = Yes or martial_law_declared = Yes or defense_minister_decision = Yes
+    consequence equals Yes
+
+  definition post_discharge_leave_granted under condition
+    dismissal_not_unsuitable_not_convicted = Yes and annual_leave_not_yet_used = Yes
+    consequence equals Yes
+
+  definition spouse_leave_synchronized under condition
+    sm.has_spouse = Yes and spouse_requests_simultaneous_leave = Yes
+    consequence equals Yes
+
+  definition discharge_year_leave under condition
+    current_year_discharge = Yes
+    consequence equals Yes
+
+  definition unused_leave_after_discharge_notice under condition
+    dismissal_not_unsuitable_not_convicted = Yes and annual_leave_not_yet_used = Yes
+    consequence equals Yes
+
+  definition leave_recall_permitted under condition
+    mobilization_declared = Yes or martial_law_declared = Yes or defense_minister_decision = Yes
+    consequence equals Yes
+
+  definition special_period_leave_limit under condition
+    special_period_active = Yes
+    consequence equals Yes
+
+  definition martial_law_annual_leave under condition
+    martial_law_active = Yes and sm.is_basic_service = No
+    consequence equals Yes
+
+  definition mobilization_leave under condition
+    mobilization_service_person = Yes and leaving_service_by_presidential_decision = Yes
+    consequence equals Yes
+
+  definition mobilization_leave_cash_compensation under condition
+    mobilization_service_person = Yes and annual_leave_unused = Yes
+    consequence equals Yes
+
+  definition death_leave_compensation under condition
+    servicemember.died_in_service = Yes
+    consequence equals Yes
+
+  definition post_pow_leave_granted under condition
+    released_from_pow = Yes and servicemember_requests = Yes
+    consequence equals Yes
+
+  definition conditional_release_leave_limit under condition
+    conditional_release_status = Yes and on_contract_service = Yes
+    consequence equals Yes
+```

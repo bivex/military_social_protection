@@ -1,0 +1,60 @@
+```catala
+declaration scope BenefitCompensation:
+  input sm content Servicemember
+  input family_member content FamilyMember
+  input household_income_per_capita content money
+  input benefit_type content BenefitType
+  input disability_group content integer
+  input is_family_of_fallen content YesNo
+  input is_pow content YesNo
+  output benefit_entitlement content YesNo
+  output benefit_amount content money
+  output transport_priority content YesNo
+  output priority_hotel content YesNo
+  output communication_benefit content YesNo
+  output mail_benefit content YesNo
+  output vehicle_benefit content YesNo
+  output penalty_moratorium_eligible content YesNo
+  output priority_telephone content YesNo
+
+scope BenefitCompensation:
+  definition transport_priority under condition
+    benefit_type = FreeTransport and is_family_of_fallen = Yes
+    consequence equals Yes
+
+  definition luggage_transport_eligible under condition
+    benefit_type = LuggageTransport and change_of_service_post = Yes
+    consequence equals Yes
+
+  definition family_transport_eligible under condition
+    benefit_type = FamilyTransport and family_reunion_travel = Yes
+    consequence equals Yes
+
+  definition priority_hotel under condition
+    benefit_type = PriorityHotel and travel_for_medical_or_official_purpose = Yes
+    consequence equals Yes
+
+  definition priority_telephone under condition
+    benefit_type = PriorityTelephone and protected_household = Yes
+    consequence equals Yes
+
+  definition communication_benefit under condition
+    benefit_type = FreeMailConscript and protected_household = Yes
+    consequence equals Yes
+
+  definition vehicle_certificate_eligible under condition
+    benefit_type = VehicleCertificate and owner_is_war_participant = Yes
+    consequence equals Yes
+
+  definition penalty_moratorium_eligible under condition
+    benefit_type = PenaltyMoratorium
+    consequence equals Yes
+
+  definition psychological_support_benefit_eligible under condition
+    benefit_type = PsychologicalSupport and war_experience_verified = Yes
+    consequence equals Yes
+
+  definition medical_treatment_abroad_eligible under condition
+    benefit_type = MedicalTreatmentAbroad and treatment_unavailable_domestically = Yes
+    consequence equals Yes
+```

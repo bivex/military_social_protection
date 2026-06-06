@@ -1,0 +1,39 @@
+## Розділ VII. Стаття 16-2 – Розміри одноразових грошових виплат
+
+```catala
+declaration scope OneTimePaymentAmounts:
+  input sm content Servicemember
+  input has_disability content YesNo
+  input disability_group content integer
+  input death_record content YesNo
+  input cause_of_death_is_service content YesNo
+  input is_pow content YesNo
+  input within_one_year_of_discharge content YesNo
+  input eligible_family_count content integer
+  output base_payment_amount content money
+  output disability_payment_amount content money
+  output family_payment_amount content money
+  output calculated_payment content money
+  output payment_basis content text
+
+scope OneTimePaymentAmounts:
+  definition base_payment_amount under condition
+    sm.status = ActiveServicemember
+    consequence equals base_one_time_payment_rate
+
+  definition disability_payment_amount under condition
+    has_disability = Yes and disability_group >= 1
+    consequence equals disability_group_amount
+
+  definition family_payment_amount under condition
+    death_record = Yes and cause_of_death_is_service = Yes
+    consequence equals per_family_member_payment_rate * eligible_family_count
+
+  definition calculated_payment under condition
+    sm.status = ActiveServicemember
+    consequence equals base_payment_amount + disability_payment_amount + family_payment_amount
+
+  definition payment_basis under condition
+    death_record = Yes and cause_of_death_is_service = Yes
+    consequence equals service_related_death
+```

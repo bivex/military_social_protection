@@ -1,0 +1,10 @@
+```catala
+declaration scope GeneralProvisions:
+  input sm content Servicemember
+  output is_protected_person content YesNo
+
+scope GeneralProvisions:
+  definition is_protected_person under condition
+    sm.status = ActiveServicemember
+    consequence equals Yes
+```

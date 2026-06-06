@@ -1,0 +1,40 @@
+```catala
+declaration scope EmploymentGuarantees:
+  input sm content Servicemember
+  output job_retoration_right content YesNo
+  output job_retention_period_months content integer
+  output unemployment_assistance_right content YesNo
+  output social_adaptation_right content YesNo
+  output reemployment_priority_right content YesNo
+  output retraining_right content YesNo
+  output retention_priority_months content integer
+  output financial_assistance_after_discharge content money
+
+scope EmploymentGuarantees:
+  definition job_retention_period_months equals 3
+  definition retention_priority_months equals 24
+
+  definition job_retoration_right under condition
+    pre_draft_employer_is_filled = Yes and (sm.status = Conscript or sm.status = OfficerDraftee)
+    consequence equals Yes
+
+  definition financial_assistance_after_discharge under condition
+    discharged_without_pension_right and within_one_month_of_discharge
+    consequence equals average_monthly_salary_of_last_employment
+
+  definition unemployment_assistance_right under condition
+    discharged_without_pension_right
+    consequence equals Yes
+
+  definition social_adaptation_right under condition
+    discharged_due_to_redundancy or dismissed_for_health_after_long_service or conscript_not_employed_before_draft or family_member.requests_adaptation = Yes
+    consequence equals Yes
+
+  definition retraining_right under condition
+    sm.service_years >= 10 and positive_service_characteristics and last_year_before_discharge
+    consequence equals Yes
+
+  definition reemployment_priority_right under condition
+    mobilized_or_special_period_draftee and completed_special_period_service
+    consequence equals Yes
+```

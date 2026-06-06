@@ -1,0 +1,73 @@
+```catala
+declaration enumeration YesNo:
+  -- No
+  -- Yes
+
+declaration enumeration ServicememberStatus:
+  -- ActiveServicemember
+  -- ReservistOnTraining
+  -- Conscript
+  -- OfficerDraftee
+  -- SpecialPeriod
+  -- Demobilized
+  -- POWorHostageOrInterneeOrMissing
+  -- DisabledVeteran
+  -- DeceasedServicemember
+  -- DismissedHealth
+  -- DismissedAge
+  -- DismissedRedundancy
+  -- FamilyMember
+
+declaration enumeration ServicememberFormation:
+  -- ZSU
+  -- NGU
+  -- DPSU
+  -- SZRU
+  -- SBU
+  -- DSSZI
+  -- OtherLegalFormation
+  -- OtherLawEnforcementSpecial
+  -- IntelligenceMoD
+  -- IntelligenceCentralExec
+
+declaration enumeration EducationLevel:
+  -- GeneralSecondaryLevels
+  -- VocationalOrHigher
+  -- HigherEducation
+
+declaration enumeration SchoolType:
+  -- GeneralSchool
+  -- VocationalSchool
+  -- University
+
+declaration enumeration BenefitType:
+  -- FreeTransport
+  -- LuggageTransport
+  -- FamilyTransport
+  -- PriorityHotel
+  -- PriorityTelephone
+  -- FreeMailConscript
+  -- VehicleCertificate
+  -- PenaltyMoratorium
+  -- PsychologicalSupport
+  -- MedicalTreatmentAbroad
+  -- FreeEducation
+  -- PriorityEducation
+
+declaration structure Servicemember:
+  data status content ServicememberStatus
+  data formation content ServicememberFormation
+  data service_years content integer
+  data calendar_service_years content integer
+  data monthly_allowance content money
+  data disability_cause content YesNo
+  data death_record content YesNo
+  data serving_abroad content YesNo
+
+declaration structure FamilyMember:
+  data relationship content integer
+  data is_minor content YesNo
+  data is_disabled_childhood content YesNo
+  data is_incapacitated content YesNo
+  data monthly_income content money
+```

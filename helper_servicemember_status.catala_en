@@ -1,0 +1,124 @@
+```catala
+declaration scope ServicememberStatusHelper:
+  input servicemember content Servicemember
+  input is_family_of_fallen content YesNo
+  input serving_within_ukraine content YesNo
+  input is_citizen_of_ukraine content YesNo
+  input participating_in_ukraine_defense content YesNo
+  input participating_in_territorial_defense content YesNo
+  input is_territorial_defense content YesNo
+  input current_year_discharge content YesNo
+  input has_position content YesNo
+  input service_years content integer
+  input calendar_service_years content integer
+  output protected_person_status content YesNo
+  output civil_rights_entitled content YesNo
+  output employment_guarantees content YesNo
+  output monetary_allowance_entitled content YesNo
+  output leave_entitled content YesNo
+  output healthcare_entitled content YesNo
+  output housing_entitled content YesNo
+  output education_entitled content YesNo
+  output benefits_compensation_entitled content YesNo
+  output pension_eligible content YesNo
+  output one_time_payment_eligible content YesNo
+
+scope ServicememberStatusHelper:
+  # Default No for all outputs (base cases)
+  label base_protected_person_status
+  definition protected_person_status equals No
+
+  label base_civil_rights_entitled
+  definition civil_rights_entitled equals No
+
+  label base_employment_guarantees
+  definition employment_guarantees equals No
+
+  label base_monetary_allowance_entitled
+  definition monetary_allowance_entitled equals No
+
+  label base_leave_entitled
+  definition leave_entitled equals No
+
+  label base_healthcare_entitled
+  definition healthcare_entitled equals No
+
+  label base_housing_entitled
+  definition housing_entitled equals No
+
+  label base_education_entitled
+  definition education_entitled equals No
+
+  label base_benefits_compensation_entitled
+  definition benefits_compensation_entitled equals No
+
+  label base_pension_eligible
+  definition pension_eligible equals No
+
+  label base_one_time_payment_eligible
+  definition one_time_payment_eligible equals No
+
+  # Conditional Yes overrides
+  exception base_protected_person_status
+  definition protected_person_status under condition
+    (servicemember.formation = ZSU and servicemember.status = ActiveServicemember and serving_within_ukraine = Yes)
+    or (servicemember.status = ActiveServicemember and is_citizen_of_ukraine = Yes and participating_in_ukraine_defense = Yes)
+    or is_family_of_fallen = Yes
+    or (servicemember.status = Conscript or servicemember.status = ReservistOnTraining)
+    or (is_territorial_defense = Yes and participating_in_territorial_defense = Yes)
+    consequence equals Yes
+
+  exception base_civil_rights_entitled
+  definition civil_rights_entitled under condition
+    (servicemember.status = ActiveServicemember or servicemember.status = ReservistOnTraining or servicemember.status = Conscript or servicemember.status = OfficerDraftee or servicemember.status = SpecialPeriod)
+    and is_citizen_of_ukraine = Yes and serving_within_ukraine = Yes
+    consequence equals Yes
+
+  exception base_employment_guarantees
+  definition employment_guarantees under condition
+    service_years >= 20
+    consequence equals Yes
+
+  exception base_monetary_allowance_entitled
+  definition monetary_allowance_entitled under condition
+    has_position = Yes and servicemember.status = ActiveServicemember
+    consequence equals Yes
+
+  exception base_leave_entitled
+  definition leave_entitled under condition
+    servicemember.status = ActiveServicemember or servicemember.status = ReservistOnTraining or servicemember.status = Conscript or servicemember.status = SpecialPeriod
+    consequence equals Yes
+
+  exception base_healthcare_entitled
+  definition healthcare_entitled under condition
+    servicemember.status = ActiveServicemember or servicemember.status = ReservistOnTraining or servicemember.status = Conscript or servicemember.status = SpecialPeriod
+    consequence equals Yes
+
+  exception base_housing_entitled
+  definition housing_entitled under condition
+    calendar_service_years >= 20
+    or servicemember.status = DisabledVeteran
+    or current_year_discharge = Yes
+    or is_family_of_fallen = Yes
+    consequence equals Yes
+
+  exception base_education_entitled
+  definition education_entitled under condition
+    servicemember.status = ActiveServicemember and service_years >= 1
+    consequence equals Yes
+
+  exception base_benefits_compensation_entitled
+  definition benefits_compensation_entitled under condition
+    is_family_of_fallen = Yes
+    consequence equals Yes
+
+  exception base_pension_eligible
+  definition pension_eligible under condition
+    servicemember.status = ActiveServicemember and service_years >= 20
+    consequence equals Yes
+
+  exception base_one_time_payment_eligible
+  definition one_time_payment_eligible under condition
+    servicemember.status = ActiveServicemember or servicemember.status = ReservistOnTraining or servicemember.status = Conscript or servicemember.status = SpecialPeriod
+    consequence equals Yes
+```

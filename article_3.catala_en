@@ -1,0 +1,20 @@
+```catala
+declaration scope UnderLawProtection:
+  input servicemember content Servicemember
+  input family_member content FamilyMember
+  output is_protected content YesNo
+
+scope UnderLawProtection:
+  definition exclusion_3 under condition
+    is_citizen_of_ukraine = No and servicemember.status = ActiveServicemember and cause_of_death_is_excluded = No
+    consequence equals Yes
+
+  definition is_protected under condition
+    servicemember.formation = ZSU and servicemember.status = ActiveServicemember and serving_within_ukraine = Yes
+    or servicemember.status = ActiveServicemember and is_citizen_of_ukraine = Yes and participating_in_ukraine_defense = Yes
+    or servicemember.disability_cause = Yes and disability_origin = ServiceRelated
+    or family_member_is_fallen = Yes
+    or servicemember.status = Conscript or servicemember.status = ReservistOnTraining
+    or member_of_volunteer_territorial_defense = Yes and participating_in_territorial_defense = Yes
+    consequence equals Yes
+```

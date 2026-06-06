@@ -1,0 +1,53 @@
+```catala
+declaration scope HousingEntitlement:
+  input sm content Servicemember
+  input family_member content FamilyMember
+  input service_years content integer
+  input is_disabled_service content YesNo
+  input is_family_of_fallen content YesNo
+  input is_internal_displaced content YesNo
+  input has_housing_entitlement_used content YesNo
+  input has_service_housing content YesNo
+  input household_income_per_capita content money
+  input on_housing_waiting_list content YesNo
+  output housing_eligibility content YesNo
+  output free_housing_entitlement content money
+  output utility_discount_eligible content YesNo
+  output social_housing_priority content YesNo
+  output land_plot_entitlement content YesNo
+  output housing_loan_entitlement content YesNo
+
+scope HousingEntitlement:
+  definition housing_eligibility under condition
+    sm.calendar_service_years >= 20
+    or disabled_during_service_or_service_illness = Yes
+    or dismissed_for_age = Yes
+    or dismissed_due_to_redundancy = Yes
+    or is_family_of_fallen = Yes
+    consequence equals Yes
+
+  definition free_housing_entitlement under condition
+    sm.calendar_service_years >= 20
+    or disabled_during_service_or_service_illness = Yes
+    or dismissed_for_age = Yes
+    or dismissed_due_to_redundancy = Yes
+    or is_family_of_fallen = Yes
+    consequence equals fair_market_value_or_state_subsidized_value
+
+  definition utility_discount_eligible under condition
+    (protected_person = disabled_service or protected_person = deceased_family or protected_person = POW_family) and household_income_per_capita <= CMU_social_benefit_income_limit
+    consequence equals Yes
+
+  definition social_housing_priority under condition
+    (sm.calendar_service_years >= 20 or disabled_during_service_or_service_illness = Yes or dismissed_for_age = Yes or dismissed_due_to_redundancy = Yes or is_family_of_fallen = Yes)
+    and housing_eligible_person_applies_for_social = Yes
+    consequence equals Yes
+
+  definition land_plot_entitlement under condition
+    sm.status = ActiveServicemember or disabled_service_person = Yes or family_of_fallen = Yes
+    consequence equals Yes
+
+  definition housing_loan_entitlement under condition
+    not_yet_received_housing_or_compensation = Yes and (sm.status = ActiveServicemember or sm.status = ReservistOnTraining or sm.status = Conscript)
+    consequence equals Yes
+```

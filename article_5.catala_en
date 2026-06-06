@@ -1,0 +1,46 @@
+```catala
+declaration scope CivilRights:
+  input sm content Servicemember
+  output voting_right content YesNo
+  output election_right content YesNo
+  output local_council_attached content YesNo
+  output political_association_right content YesNo
+  output strike_prohibited content YesNo
+  output forced_non_service_prohibited content YesNo
+  output information_right content YesNo
+  output complaint_right content YesNo
+  output legal_aid_right content YesNo
+
+scope CivilRights:
+  definition voting_right under condition
+    (sm.status = ActiveServicemember or sm.status = ReservistOnTraining or sm.status = Conscript or sm.status = OfficerDraftee or sm.status = SpecialPeriod) and is_nationality_Ukraine = Yes and serving_within_Ukraine = Yes
+    consequence equals Yes
+
+  definition election_right under condition
+    (sm.status = ActiveServicemember or sm.status = ReservistOnTraining or sm.status = Conscript or sm.status = OfficerDraftee or sm.status = SpecialPeriod) and is_nationality_Ukraine = Yes and serving_within_Ukraine = Yes
+    consequence equals Yes
+
+  definition political_association_right under condition
+    sm.status = ActiveServicemember or sm.status = ReservistOnTraining or sm.status = Conscript or sm.status = OfficerDraftee or sm.status = SpecialPeriod
+    consequence equals Yes
+
+  definition strike_prohibited under condition
+    sm.status = ActiveServicemember or sm.status = ReservistOnTraining or sm.status = Conscript or sm.status = OfficerDraftee or sm.status = SpecialPeriod
+    consequence equals Yes
+
+  definition forced_non_service_prohibited under condition
+    assigned_non_military_non_disaster_task = Yes
+    consequence equals Yes
+
+  definition information_right under condition
+    is_protected_person = Yes
+    consequence equals Yes
+
+  definition complaint_right under condition
+    unlawful_military_authority_decision = Yes
+    consequence equals Yes
+
+  definition legal_aid_right under condition
+    protected_servicemember = Yes
+    consequence equals Yes
+```

@@ -1,0 +1,40 @@
+```catala
+declaration scope EducationEntitlement:
+  input sm content Servicemember
+  input family_member content FamilyMember
+  input education_level content EducationLevel
+  input institution_type content SchoolType
+  input minors_under_care content integer
+  input is_internally_displaced content YesNo
+  output education_fee_exemption content YesNo
+  output territorial_priority_admission content YesNo
+  output military_boarding_school_guarantee content YesNo
+  output higher_education_priority content YesNo
+  output family_member_education_support content YesNo
+  output displaced_education_support content YesNo
+
+scope EducationEntitlement:
+  definition education_fee_exemption under condition
+    sm.status = ActiveServicemember and education_level = GeneralSecondaryLevels
+    consequence equals Yes
+
+  definition territorial_priority_admission under condition
+    education_level = VocationalOrHigher and sm.service_years >= 1
+    consequence equals Yes
+
+  definition military_boarding_school_guarantee under condition
+    family_member.is_minor = Yes and minors_under_care >= 1
+    consequence equals Yes
+
+  definition higher_education_priority under condition
+    education_level = HigherEducation and sm.calendar_service_years >= 2
+    consequence equals Yes
+
+  definition family_member_education_support under condition
+    family_member.is_minor = Yes
+    consequence equals Yes
+
+  definition displaced_education_support under condition
+    is_internally_displaced = Yes and education_level = GeneralSecondaryLevels
+    consequence equals Yes
+```
