@@ -14,7 +14,7 @@ declaration scope OneTimePaymentAmounts:
   output disability_payment_amount content money
   output family_payment_amount content money
   output calculated_payment content money
-  output payment_basis content text
+  output payment_basis content YesNo
 
 scope OneTimePaymentAmounts:
   definition base_payment_amount under condition
@@ -35,5 +35,5 @@ scope OneTimePaymentAmounts:
 
   definition payment_basis under condition
     death_record = Yes and cause_of_death_is_service = Yes
-    consequence equals service_related_death
+    consequence equals Yes
 ```

@@ -2,6 +2,7 @@
 declaration scope UnderLawProtection:
   input servicemember content Servicemember
   input family_member content FamilyMember
+  internal exclusion_3 content YesNo
   output is_protected content YesNo
 
 scope UnderLawProtection:

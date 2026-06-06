@@ -7,6 +7,11 @@ declaration scope BenefitCompensation:
   input disability_group content integer
   input is_family_of_fallen content YesNo
   input is_pow content YesNo
+  internal luggage_transport_eligible content YesNo
+  internal family_transport_eligible content YesNo
+  internal vehicle_certificate_eligible content YesNo
+  internal psychological_support_benefit_eligible content YesNo
+  internal medical_treatment_abroad_eligible content YesNo
   output benefit_entitlement content YesNo
   output benefit_amount content money
   output transport_priority content YesNo

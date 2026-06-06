@@ -3,6 +3,17 @@ declaration scope LeaveEntitlement:
   input sm content Servicemember
   input leave_year content integer
   input current_year_discharge content YesNo
+  internal spouse_leave_synchronized content YesNo
+  internal discharge_year_leave content YesNo
+  internal unused_leave_after_discharge_notice content YesNo
+  internal leave_recall_permitted content YesNo
+  internal special_period_leave_limit content YesNo
+  internal martial_law_annual_leave content YesNo
+  internal mobilization_leave content YesNo
+  internal mobilization_leave_cash_compensation content YesNo
+  internal death_leave_compensation content YesNo
+  internal post_pow_leave_granted content YesNo
+  internal conditional_release_leave_limit content YesNo
   output annual_main_leave_days content integer
   output annual_additional_leave_days content integer
   output leave_pay_entitlement content YesNo

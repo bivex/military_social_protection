@@ -3,6 +3,10 @@
 ```catala
 declaration scope MonetaryAllowance:
   input sm content Servicemember
+  internal position_allowance content money
+  internal rank_allowance content money
+  internal monthly_additions content money
+  internal special_bonus content money
   output base_monthly_allowance content money
   output total_monthly_allowance content money
   output pow_benefit_amount content money
@@ -43,6 +47,8 @@ scope MonetaryAllowance:
 declaration scope LogisticalProvision:
   input sm content Servicemember
   input is_draftee_training content YesNo
+  internal family_transfer_allowance content YesNo
+  internal medical_social_provision_gender_consideration content YesNo
   output food_entitlement content YesNo
   output clothing_entitlement content YesNo
   output moving_assistance content money
@@ -72,9 +78,9 @@ scope LogisticalProvision:
     on_official_travel_ukraine_or_abroad = Yes
     consequence equals Yes
 
-  rule medical_social_provision_gender_consideration under condition
+  definition medical_social_provision_gender_consideration under condition
     state_provision_policy_in_force = Yes
-    consequence fulfilled
+    consequence equals Yes
 ```
 
 ## Article 9-2 – Wartime bonuses
@@ -83,6 +89,8 @@ scope LogisticalProvision:
 declaration scope WartimeBonus:
   input sm content Servicemember
   input martial_law_in_force content YesNo
+  internal additional_monthly_bonus content money
+  internal equipment_destruction_bonus content YesNo
   output total_wartime_compensation content money
 
 scope WartimeBonus:

@@ -10,6 +10,8 @@ declaration scope HealthcareEntitlement:
   input household_income_per_capita content money
   input child_sick content YesNo
   input child_hospitalization content YesNo
+  internal reintegration_program_entitled content YesNo
+  internal free_sanatorium_after_hospital content YesNo
   output free_military_medical_care content YesNo
   output psychological_support content YesNo
   output sanatorium_right content YesNo
