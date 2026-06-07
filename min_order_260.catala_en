@@ -1,0 +1,606 @@
+## Ministry of Defense Order #260 (07.06.2018)
+## Detailed rules for monetary provision per KMU Resolution #704
+## Covers: service peculiarity coefficients, qualification bonuses,
+##   medical category bonus, honorary/sports/science bonuses,
+##   premium with discipline reduction, SSO bonus, mountain increase,
+##   one-time wartime reward
+
+```catala
+declaration enumeration ServicePeculiarityLevel:
+  -- SP_MedicalInfectious
+  -- SP_IonizingRadiation
+  -- SP_EpidemiologicalOutbreak
+  -- SP_PathologyLabNonMedical
+  -- SP_MilitaryPolice
+  -- SP_UndergroundService
+  -- SP_TuberculosisPsychiatric
+  -- SP_PathologyLabMedical
+  -- SP_HospitalSurgeons
+  -- SP_CombatDutyAirDefense
+  -- SP_GroundAviationArmor
+  -- SP_TrainingInstructors
+  -- SP_DisciplinaryUnits
+  -- SP_ArmyCombatSystem
+  -- SP_TankArtilleryCrews
+  -- SP_SelfPropelledLaunchers
+  -- SP_Divers
+  -- SP_NavalCrews
+  -- SP_AirborneSSOMarines
+  -- SP_SpecialForces
+  -- SP_Paratroopers
+  -- SP_FirefightingCrews
+  -- SP_FlightCrew
+  -- SP_SnipersSpecialForces
+  -- SP_DroneOperators
+  -- SP_SnakeIsland
+  -- SP_SpecificUnits
+  -- SP_Default
+
+declaration enumeration QualificationClass:
+  -- SecondClass
+  -- FirstClass
+  -- MasterClass
+
+declaration enumeration AviationQualificationClass:
+  -- AviationSecondClass
+  -- AviationFirstClass
+  -- SniperClass
+
+declaration enumeration ServicememberCategoryQualification:
+  -- OfficerNonAviation
+  -- ConscriptNCO
+  -- AviationOfficer
+
+declaration enumeration MedicalQualificationCategory:
+  -- SecondCategory
+  -- FirstCategory
+  -- HighestCategory
+
+declaration enumeration MedicalPositionCategory:
+  -- SurgeonSpecialist
+  -- OtherMedicalOfficer
+  -- NCOMedicalStaff
+
+declaration enumeration HonoraryTitleGrade:
+  -- HonoredTitle
+  -- PeoplesTitle
+
+declaration enumeration SportsTitleGrade:
+  -- MasterOfSports
+  -- HonoredMasterOrInternational
+
+declaration enumeration ScientificDegree:
+  -- CandidateOfSciences
+  -- DoctorOfSciences
+
+declaration enumeration AcademicTitle:
+  -- AssociateProfessor
+  -- Professor
+
+declaration enumeration DisciplineSanctionLevel:
+  -- NoSanction
+  -- Reprimand
+  -- SevereReprimand
+  -- TwoReprimands
+  -- ThreeReprimands
+  -- SeriousViolation
+
+declaration enumeration SSOServiceCategory:
+  -- SSO_InstructorMainUnit
+  -- SSO_CommandManagement
+  -- SSO_SupportUnit
+  -- SSO_Other
+
+declaration enumeration MountainTerritoryType:
+  -- NoMountainTerritory
+  -- MountainSettlement
+  -- SnakeIsland
+```
+
+## Section V — Mountain territory position salary increase
+
+```catala
+declaration scope Order260MountainIncrease:
+  input position_salary content money
+  input mountain_territory content MountainTerritoryType
+  output increased_position_salary content money
+
+scope Order260MountainIncrease:
+  label mountain_25 exception default_mountain
+  definition increased_position_salary under condition
+    mountain_territory = MountainSettlement
+    consequence equals position_salary + position_salary * 25 / 100
+
+  label snake_50 exception default_mountain
+  definition increased_position_salary under condition
+    mountain_territory = SnakeIsland
+    consequence equals position_salary + position_salary * 50 / 100
+
+  label default_mountain
+  definition increased_position_salary equals position_salary
+```
+
+## Section VI + Appendix — Service peculiarity bonus
+## Coefficients from 1.05 to 1.55, applied to 65% base
+## Bonus = (position_salary + rank_allowance + los_allowance) * percentage / 100
+
+```catala
+declaration scope Order260ServicePeculiarityPercentage:
+  input sp_level content ServicePeculiarityLevel
+  output sp_bonus_percentage content integer
+
+scope Order260ServicePeculiarityPercentage:
+  label sp_medical_infectious exception sp_default
+  definition sp_bonus_percentage under condition
+    sp_level = SP_MedicalInfectious
+    consequence equals 68
+
+  label sp_ionizing_radiation exception sp_default
+  definition sp_bonus_percentage under condition
+    sp_level = SP_IonizingRadiation
+    consequence equals 68
+
+  label sp_epidemiological exception sp_default
+  definition sp_bonus_percentage under condition
+    sp_level = SP_EpidemiologicalOutbreak
+    consequence equals 68
+
+  label sp_pathology_non_med exception sp_default
+  definition sp_bonus_percentage under condition
+    sp_level = SP_PathologyLabNonMedical
+    consequence equals 68
+
+  label sp_military_police exception sp_default
+  definition sp_bonus_percentage under condition
+    sp_level = SP_MilitaryPolice
+    consequence equals 68
+
+  label sp_underground exception sp_default
+  definition sp_bonus_percentage under condition
+    sp_level = SP_UndergroundService
+    consequence equals 68
+
+  label sp_tb_psychiatric exception sp_default
+  definition sp_bonus_percentage under condition
+    sp_level = SP_TuberculosisPsychiatric
+    consequence equals 71
+
+  label sp_pathology_med exception sp_default
+  definition sp_bonus_percentage under condition
+    sp_level = SP_PathologyLabMedical
+    consequence equals 71
+
+  label sp_hospital_surgeons exception sp_default
+  definition sp_bonus_percentage under condition
+    sp_level = SP_HospitalSurgeons
+    consequence equals 78
+
+  label sp_combat_duty_ad exception sp_default
+  definition sp_bonus_percentage under condition
+    sp_level = SP_CombatDutyAirDefense
+    consequence equals 78
+
+  label sp_ground_aviation exception sp_default
+  definition sp_bonus_percentage under condition
+    sp_level = SP_GroundAviationArmor
+    consequence equals 78
+
+  label sp_training_instructors exception sp_default
+  definition sp_bonus_percentage under condition
+    sp_level = SP_TrainingInstructors
+    consequence equals 81
+
+  label sp_disciplinary exception sp_default
+  definition sp_bonus_percentage under condition
+    sp_level = SP_DisciplinaryUnits
+    consequence equals 81
+
+  label sp_army_combat exception sp_default
+  definition sp_bonus_percentage under condition
+    sp_level = SP_ArmyCombatSystem
+    consequence equals 81
+
+  label sp_tank_artillery exception sp_default
+  definition sp_bonus_percentage under condition
+    sp_level = SP_TankArtilleryCrews
+    consequence equals 84
+
+  label sp_self_propelled exception sp_default
+  definition sp_bonus_percentage under condition
+    sp_level = SP_SelfPropelledLaunchers
+    consequence equals 84
+
+  label sp_divers exception sp_default
+  definition sp_bonus_percentage under condition
+    sp_level = SP_Divers
+    consequence equals 87
+
+  label sp_naval exception sp_default
+  definition sp_bonus_percentage under condition
+    sp_level = SP_NavalCrews
+    consequence equals 87
+
+  label sp_airborne_sso exception sp_default
+  definition sp_bonus_percentage under condition
+    sp_level = SP_AirborneSSOMarines
+    consequence equals 87
+
+  label sp_special_forces exception sp_default
+  definition sp_bonus_percentage under condition
+    sp_level = SP_SpecialForces
+    consequence equals 87
+
+  label sp_paratroopers exception sp_default
+  definition sp_bonus_percentage under condition
+    sp_level = SP_Paratroopers
+    consequence equals 87
+
+  label sp_firefighting exception sp_default
+  definition sp_bonus_percentage under condition
+    sp_level = SP_FirefightingCrews
+    consequence equals 94
+
+  label sp_flight_crew exception sp_default
+  definition sp_bonus_percentage under condition
+    sp_level = SP_FlightCrew
+    consequence equals 100
+
+  label sp_snipers exception sp_default
+  definition sp_bonus_percentage under condition
+    sp_level = SP_SnipersSpecialForces
+    consequence equals 100
+
+  label sp_drones exception sp_default
+  definition sp_bonus_percentage under condition
+    sp_level = SP_DroneOperators
+    consequence equals 100
+
+  label sp_snake_island exception sp_default
+  definition sp_bonus_percentage under condition
+    sp_level = SP_SnakeIsland
+    consequence equals 100
+
+  label sp_specific_units exception sp_default
+  definition sp_bonus_percentage under condition
+    sp_level = SP_SpecificUnits
+    consequence equals 100
+
+  label sp_default
+  definition sp_bonus_percentage equals 65
+```
+
+```catala
+declaration scope Order260ServicePeculiarityBonus:
+  input position_salary content money
+  input rank_allowance content money
+  input los_allowance content money
+  input sp_bonus_pct content integer
+  output service_peculiarity_bonus content money
+
+scope Order260ServicePeculiarityBonus:
+  definition service_peculiarity_bonus equals
+    (position_salary + rank_allowance + los_allowance) * sp_bonus_pct / 100
+```
+
+## Section VII — SSO service bonus (% of subsistence minimum)
+
+```catala
+declaration scope Order260SSOBonus:
+  input subsistence_minimum content money
+  input sso_category content SSOServiceCategory
+  output sso_bonus content money
+
+scope Order260SSOBonus:
+  label sso_instructor exception sso_default
+  definition sso_bonus under condition
+    sso_category = SSO_InstructorMainUnit
+    consequence equals subsistence_minimum * 100 / 100
+
+  label sso_command exception sso_default
+  definition sso_bonus under condition
+    sso_category = SSO_CommandManagement
+    consequence equals subsistence_minimum * 80 / 100
+
+  label sso_support exception sso_default
+  definition sso_bonus under condition
+    sso_category = SSO_SupportUnit
+    consequence equals subsistence_minimum * 70 / 100
+
+  label sso_default
+  definition sso_bonus equals subsistence_minimum * 50 / 100
+```
+
+## Section VIII — Qualification class bonus (% of position salary)
+
+```catala
+declaration scope Order260QualificationBonus:
+  input position_salary content money
+  input sm_category content ServicememberCategoryQualification
+  input qualification_class content QualificationClass
+  input aviation_qualification content AviationQualificationClass
+  output qualification_bonus content money
+
+scope Order260QualificationBonus:
+  label officer_2nd exception qual_default
+  definition qualification_bonus under condition
+    sm_category = OfficerNonAviation and qualification_class = SecondClass
+    consequence equals position_salary * 3 / 100
+
+  label officer_1st exception qual_default
+  definition qualification_bonus under condition
+    sm_category = OfficerNonAviation and qualification_class = FirstClass
+    consequence equals position_salary * 5 / 100
+
+  label officer_master exception qual_default
+  definition qualification_bonus under condition
+    sm_category = OfficerNonAviation and qualification_class = MasterClass
+    consequence equals position_salary * 7 / 100
+
+  label conscript_2nd exception qual_default
+  definition qualification_bonus under condition
+    sm_category = ConscriptNCO and qualification_class = SecondClass
+    consequence equals position_salary * 5 / 100
+
+  label conscript_1st exception qual_default
+  definition qualification_bonus under condition
+    sm_category = ConscriptNCO and qualification_class = FirstClass
+    consequence equals position_salary * 10 / 100
+
+  label aviation_2nd exception qual_default
+  definition qualification_bonus under condition
+    sm_category = AviationOfficer and aviation_qualification = AviationSecondClass
+    consequence equals position_salary * 5 / 100
+
+  label aviation_1st exception qual_default
+  definition qualification_bonus under condition
+    sm_category = AviationOfficer and aviation_qualification = AviationFirstClass
+    consequence equals position_salary * 7 / 100
+
+  label aviation_sniper exception qual_default
+  definition qualification_bonus under condition
+    sm_category = AviationOfficer and aviation_qualification = SniperClass
+    consequence equals position_salary * 9 / 100
+
+  label qual_default
+  definition qualification_bonus equals $0
+```
+
+## Section IX — Medical qualification category bonus (% of position salary)
+
+```catala
+declaration scope Order260MedicalQualificationBonus:
+  input position_salary content money
+  input medical_position content MedicalPositionCategory
+  input medical_category content MedicalQualificationCategory
+  output medical_qualification_bonus content money
+
+scope Order260MedicalQualificationBonus:
+  label surgeon_2nd exception med_qual_default
+  definition medical_qualification_bonus under condition
+    medical_position = SurgeonSpecialist and medical_category = SecondCategory
+    consequence equals position_salary * 7 / 100
+
+  label surgeon_1st exception med_qual_default
+  definition medical_qualification_bonus under condition
+    medical_position = SurgeonSpecialist and medical_category = FirstCategory
+    consequence equals position_salary * 9 / 100
+
+  label surgeon_highest exception med_qual_default
+  definition medical_qualification_bonus under condition
+    medical_position = SurgeonSpecialist and medical_category = HighestCategory
+    consequence equals position_salary * 11 / 100
+
+  label other_med_2nd exception med_qual_default
+  definition medical_qualification_bonus under condition
+    medical_position = OtherMedicalOfficer and medical_category = SecondCategory
+    consequence equals position_salary * 3 / 100
+
+  label other_med_1st exception med_qual_default
+  definition medical_qualification_bonus under condition
+    medical_position = OtherMedicalOfficer and medical_category = FirstCategory
+    consequence equals position_salary * 5 / 100
+
+  label other_med_highest exception med_qual_default
+  definition medical_qualification_bonus under condition
+    medical_position = OtherMedicalOfficer and medical_category = HighestCategory
+    consequence equals position_salary * 7 / 100
+
+  label nco_med_2nd exception med_qual_default
+  definition medical_qualification_bonus under condition
+    medical_position = NCOMedicalStaff and medical_category = SecondCategory
+    consequence equals position_salary * 3 / 100
+
+  label nco_med_1st exception med_qual_default
+  definition medical_qualification_bonus under condition
+    medical_position = NCOMedicalStaff and medical_category = FirstCategory
+    consequence equals position_salary * 5 / 100
+
+  label nco_med_highest exception med_qual_default
+  definition medical_qualification_bonus under condition
+    medical_position = NCOMedicalStaff and medical_category = HighestCategory
+    consequence equals position_salary * 7 / 100
+
+  label med_qual_default
+  definition medical_qualification_bonus equals $0
+```
+
+## Section XIII — Honorary title bonus (% of position salary)
+
+```catala
+declaration scope Order260HonoraryTitleBonus:
+  input position_salary content money
+  input honorary_title content HonoraryTitleGrade
+  output honorary_title_bonus content money
+
+scope Order260HonoraryTitleBonus:
+  label honored exception honorary_default
+  definition honorary_title_bonus under condition
+    honorary_title = HonoredTitle
+    consequence equals position_salary * 10 / 100
+
+  label peoples exception honorary_default
+  definition honorary_title_bonus under condition
+    honorary_title = PeoplesTitle
+    consequence equals position_salary * 15 / 100
+
+  label honorary_default
+  definition honorary_title_bonus equals $0
+```
+
+## Section XIV — Sports title bonus (% of position salary)
+
+```catala
+declaration scope Order260SportsTitleBonus:
+  input position_salary content money
+  input sports_title content SportsTitleGrade
+  output sports_title_bonus content money
+
+scope Order260SportsTitleBonus:
+  label master exception sports_default
+  definition sports_title_bonus under condition
+    sports_title = MasterOfSports
+    consequence equals position_salary * 5 / 100
+
+  label honored_master exception sports_default
+  definition sports_title_bonus under condition
+    sports_title = HonoredMasterOrInternational
+    consequence equals position_salary * 10 / 100
+
+  label sports_default
+  definition sports_title_bonus equals $0
+```
+
+## Section XV — Scientific degree and academic title bonus (% of position salary)
+
+```catala
+declaration scope Order260ScientificDegreeBonus:
+  input position_salary content money
+  input scientific_degree content ScientificDegree
+  input academic_title content AcademicTitle
+  output scientific_bonus content money
+  output academic_bonus content money
+  output total_scientific_payment content money
+
+scope Order260ScientificDegreeBonus:
+  label phd exception sci_degree_default
+  definition scientific_bonus under condition
+    scientific_degree = CandidateOfSciences
+    consequence equals position_salary * 5 / 100
+
+  label doctor exception sci_degree_default
+  definition scientific_bonus under condition
+    scientific_degree = DoctorOfSciences
+    consequence equals position_salary * 10 / 100
+
+  label sci_degree_default
+  definition scientific_bonus equals $0
+
+  label associate_prof exception acad_default
+  definition academic_bonus under condition
+    academic_title = AssociateProfessor
+    consequence equals position_salary * 5 / 100
+
+  label full_prof exception acad_default
+  definition academic_bonus under condition
+    academic_title = Professor
+    consequence equals position_salary * 10 / 100
+
+  label acad_default
+  definition academic_bonus equals $0
+
+  definition total_scientific_payment equals scientific_bonus + academic_bonus
+```
+
+## Section XVI — Premium with discipline reduction (% of position salary)
+## Base premium: minimum 10% of position salary
+## Reductions: 90%/80%/60%/50%/0% based on discipline sanctions
+
+```catala
+declaration scope Order260Premium:
+  input position_salary content money
+  input base_premium_percentage content integer
+  input discipline_sanction content DisciplineSanctionLevel
+  output premium_amount content money
+
+scope Order260Premium:
+  label no_sanction exception premium_default
+  definition premium_amount under condition
+    discipline_sanction = NoSanction
+    consequence equals position_salary * base_premium_percentage / 100
+
+  label reprimand exception premium_default
+  definition premium_amount under condition
+    discipline_sanction = Reprimand
+    consequence equals position_salary * base_premium_percentage * 90 / 10000
+
+  label severe_reprimand exception premium_default
+  definition premium_amount under condition
+    discipline_sanction = SevereReprimand
+    consequence equals position_salary * base_premium_percentage * 80 / 10000
+
+  label two_reprimands exception premium_default
+  definition premium_amount under condition
+    discipline_sanction = TwoReprimands
+    consequence equals position_salary * base_premium_percentage * 60 / 10000
+
+  label three_reprimands exception premium_default
+  definition premium_amount under condition
+    discipline_sanction = ThreeReprimands
+    consequence equals position_salary * base_premium_percentage * 50 / 10000
+
+  label premium_default
+  definition premium_amount equals $0
+```
+
+## Section XXXVII — One-time wartime reward
+## 70,000 UAH per cumulative 30 days of combat missions
+
+```catala
+declaration scope Order260OneTimeWartimeReward:
+  input martial_law_in_force content YesNo
+  input cumulative_combat_days content integer
+  output one_time_reward content money
+
+scope Order260OneTimeWartimeReward:
+  label reward_due exception reward_default
+  definition one_time_reward under condition
+    martial_law_in_force = Yes and cumulative_combat_days >= 30
+    consequence equals $70000 * (cumulative_combat_days / 30)
+
+  label reward_default
+  definition one_time_reward equals $0
+```
+
+## Section X — State secrets expert bonus (% of position salary)
+
+```catala
+declaration scope Order260StateSecretsBonus:
+  input position_salary content money
+  input is_state_secrets_expert content YesNo
+  input expert_work_category content integer
+  output state_secrets_bonus content money
+
+scope Order260StateSecretsBonus:
+  label expert_base exception secrets_default
+  definition state_secrets_bonus under condition
+    is_state_secrets_expert = Yes and expert_work_category = 0
+    consequence equals position_salary * 20 / 100
+
+  label expert_cat_1 exception secrets_default
+  definition state_secrets_bonus under condition
+    is_state_secrets_expert = Yes and expert_work_category = 1
+    consequence equals position_salary * 10 / 100
+
+  label expert_cat_2 exception secrets_default
+  definition state_secrets_bonus under condition
+    is_state_secrets_expert = Yes and expert_work_category = 2
+    consequence equals position_salary * 15 / 100
+
+  label expert_cat_3 exception secrets_default
+  definition state_secrets_bonus under condition
+    is_state_secrets_expert = Yes and expert_work_category = 3
+    consequence equals position_salary * 20 / 100
+
+  label secrets_default
+  definition state_secrets_bonus equals $0
+```
