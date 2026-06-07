@@ -37,13 +37,32 @@ declaration enumeration ServicememberJob:
   -- Cook
   -- Baker
   -- MechanicDriver
+  -- Firefighter
   -- RegularDuty
+
+# Перелік видів добового наряду (Стаття 268)
+declaration enumeration DailyDutyType:
+  -- UnitDutyOfficer             # Черговий частини
+  -- AssistantUnitDutyOfficer    # Помічник чергового частини
+  -- GuardDuty                   # Варта
+  -- ParkDutyOfficer             # Черговий парку
+  -- StandbyUnit                 # Черговий підрозділ
+  -- CheckpointDutyOfficer       # Черговий КПП
+  -- HQDutyOfficer               # Черговий штабу
+  -- MedicalDutyOfficer          # Черговий фельдшер/санінструктор
+  -- CanteenDutyOfficer          # Черговий їдальні
+  -- Signalist                   # Сигналіст-барабанщик
+  -- FireSquad                   # Пожежний наряд
+  -- CompanyDutyOfficer          # Черговий роти
+  -- CompanyOrderly              # Днювальний роти
+  -- None                        # Не в наряді
 
 # --- Основний Scope Статуту ---
 
 scope InternalServiceStatute:
   context sm content Servicemember
   context sm_rank content MilitaryRank
+  context sm_job content ServicememberJob
   
   # --- Загальні положення ---
   
@@ -55,11 +74,6 @@ scope InternalServiceStatute:
     sm.status = OfficerDraftee or
     sm.status = ReservistOnTraining
 
-  # =========================================================================
-  # ПРАВА РЯДОВОГО ТА СЕРЖАНТСЬКОГО СКЛАДУ
-  # (Солдати, матроси, молодші сержанти тощо)
-  # =========================================================================
-
   context is_enlisted_or_junior_nco content boolean
   rule is_enlisted_or_junior_nco fulfilled if
     sm_rank = Recruit or
@@ -68,7 +82,74 @@ scope InternalServiceStatute:
     sm_rank = JuniorSergeant or
     sm_rank = Sergeant
 
-  # --- Статті 12 та 14: Право на звернення та захист ---
+  # =========================================================================
+  # ДОБОВИЙ НАРЯД (Daily Duty)
+  # =========================================================================
+
+  context current_duty content DailyDutyType
+
+  # --- Звільнення від нарядів ---
+  
+  # Стаття 193: Пожежники звільняються від нарядів, не пов'язаних з пожежною охороною
+  context exempt_from_general_duty content boolean
+  rule exempt_from_general_duty fulfilled if sm_job = Firefighter
+  rule exempt_from_general_duty fulfilled = false
+  
+  # Стаття 269: Звільнення у зв'язку з материнством/дитинством (для жінок-військовослужбовців)
+  context has_maternity_childcare_exemption content boolean
+  rule exempt_from_general_duty fulfilled if has_maternity_childcare_exemption
+
+  # --- Стаття 284: Підготовка до наряду ---
+  # Мінімальний час для підготовки (у годинах)
+  context duty_prep_time_hours content integer
+  rule duty_prep_time_hours fulfilled if current_duty <> None = 3
+
+  # Мінімальний час для відпочинку перед нарядом (у годинах)
+  context duty_pre_rest_time_hours content integer
+  rule duty_pre_rest_time_hours fulfilled if current_duty <> None = 1
+
+  # --- Стаття 293: Відпочинок під час несення добового наряду ---
+  # Визначаємо, чи має право особа відпочивати лежачи (спати)
+  context can_sleep_on_duty content boolean
+  rule can_sleep_on_duty fulfilled if current_duty <> None
+  
+  # Максимальна кількість годин сну для чергових (без роздягання)
+  context max_sleep_hours_on_duty content integer
+  rule max_sleep_hours_on_duty fulfilled if
+    current_duty = UnitDutyOfficer or
+    current_duty = AssistantUnitDutyOfficer or
+    current_duty = CompanyDutyOfficer or
+    current_duty = ParkDutyOfficer or
+    current_duty = CheckpointDutyOfficer or
+    current_duty = CanteenDutyOfficer or
+    current_duty = MedicalDutyOfficer or
+    current_duty = HQDutyOfficer
+    = 4
+
+  # Днювальні вільної зміни можуть спати від відбою до підйому
+  context can_sleep_undressed_on_duty content boolean
+  rule can_sleep_undressed_on_duty fulfilled if 
+    current_duty = CompanyOrderly or 
+    current_duty = Signalist
+
+  # --- Стаття 294: Відпочинок ПІСЛЯ наряду ---
+  # Звільнення від занять та робіт у день зміни з наряду
+  context exempt_from_work_after_duty content boolean
+  rule exempt_from_work_after_duty fulfilled if current_duty <> None
+
+  # Компенсація вихідного дня, якщо наряд припав на вихідний/святковий день
+  context duty_was_on_weekend content boolean
+  context gets_compensatory_day_off content boolean
+  
+  rule gets_compensatory_day_off fulfilled if
+    current_duty <> None and
+    duty_was_on_weekend and
+    (sm.status = ActiveServicememberOnContract or sm.status = OfficerDraftee)
+
+  # =========================================================================
+  # ІНШІ ПРАВА ТА НОРМИ (збережено з попередніх кроків)
+  # =========================================================================
+
   # Право звертатися до командира з особистих/службових питань
   context right_to_address_commander content boolean
   rule right_to_address_commander fulfilled if is_enlisted_or_junior_nco
@@ -77,13 +158,7 @@ scope InternalServiceStatute:
   context right_to_report_harassment_to_advisor content boolean
   rule right_to_report_harassment_to_advisor fulfilled if is_enlisted_or_junior_nco
 
-  # --- Стаття 16-1: Право на інтелектуальну власність ---
-  context created_intellectual_property_on_duty content boolean
-  context right_to_file_ip_claim content boolean
-  rule right_to_file_ip_claim fulfilled if
-    is_enlisted_or_junior_nco and created_intellectual_property_on_duty
-
-  # --- Стаття 22: Право на застосування зброї та фізичної сили ---
+  # Стаття 22: Право на застосування зброї
   context is_protecting_life content boolean
   context is_detaining_criminal content boolean
   context is_repelling_attack content boolean
@@ -91,99 +166,23 @@ scope InternalServiceStatute:
 
   context right_to_use_force_and_weapons content boolean
   rule right_to_use_force_and_weapons fulfilled if
-    is_enlisted_or_junior_nco and
-    (is_protecting_life or 
-     is_detaining_criminal or 
-     is_repelling_attack or 
-     is_preventing_weapon_seizure)
+    (is_protecting_life or is_detaining_criminal or is_repelling_attack or is_preventing_weapon_seizure)
 
-  # --- Стаття 199, 201, 203: Права на відпочинок ---
-  # Мінімальна кількість годин сну на добу
-  context right_to_daily_sleep_hours content integer
-  rule right_to_daily_sleep_hours fulfilled if is_enlisted_or_junior_nco = 8
+  # Норми казарми
+  context barracks_reqs content BarracksRequirements
+  rule barracks_reqs.min_area_sq_m fulfilled = 2.5
+  rule barracks_reqs.max_area_sq_m fulfilled = 4.0
+  rule barracks_reqs.min_air_vol_cubic_m fulfilled = 9.0
+  rule barracks_reqs.max_air_vol_cubic_m fulfilled = 12.0
 
-  # Право на відпочинок після обіду (у хвилинах)
-  context right_to_post_lunch_rest_minutes content integer
-  rule right_to_post_lunch_rest_minutes fulfilled if is_enlisted_or_junior_nco = 30
-
-  # Компенсаційний вихідний, якщо працював у свято/вихідний (для контрактників)
-  context worked_on_weekend content boolean
-  context right_to_compensatory_day_off content boolean
-  rule right_to_compensatory_day_off fulfilled if
-    is_enlisted_or_junior_nco and 
-    worked_on_weekend and 
-    sm.status = ActiveServicememberOnContract
-
-  # --- Стаття 216-217: Право на переміщення та звільнення ---
-  # Право вільно переміщатися по території частини у вільний час
-  context right_to_free_movement_in_base content boolean
-  rule right_to_free_movement_in_base fulfilled if is_enlisted_or_junior_nco
-
-  # Право на звільнення в день виборів (у годинах) для голосування
-  context is_election_day content boolean
-  context is_on_daily_duty content boolean
-  context right_to_election_leave_hours content integer
-  rule right_to_election_leave_hours fulfilled if
-    is_enlisted_or_junior_nco and 
-    is_election_day and 
-    not is_on_daily_duty
-    = 4
-  rule right_to_election_leave_hours fulfilled = 0
-
-  # Загальне право на звільнення за межі частини (для строковиків)
+  # Право на звільнення в місто (для строковиків)
   context conscript_leave_info content ConscriptLeave
   context right_to_leave_base content boolean
   rule right_to_leave_base fulfilled if
-    is_enlisted_or_junior_nco and
     sm.status = Conscript and
     conscript_leave_info.has_taken_oath = Yes and
     conscript_leave_info.has_disciplinary_ban = No and
-    not is_on_daily_duty
+    current_duty = None
   
-  # Контрактники мають право вільно залишати межі гарнізону у вільний час (звітувавши командиру)
-  rule right_to_leave_base fulfilled if
-    is_enlisted_or_junior_nco and
-    sm.status = ActiveServicememberOnContract
-
-  # --- Стаття 254-257: Право на охорону здоров'я ---
-  # Право на невідкладну медичну допомогу в будь-який час доби
-  context right_to_emergency_medical_care content boolean
-  rule right_to_emergency_medical_care fulfilled if is_enlisted_or_junior_nco
-
-  # Максимальне звільнення від службових обов'язків за довідкою лікаря (у добах)
-  context right_to_medical_exemption_days content integer
-  rule right_to_medical_exemption_days fulfilled if is_enlisted_or_junior_nco = 6
-
-  # --- Стаття 263-265: Санітарно-гігієнічні права ---
-  # Право на миття в лазні або душі (разів на тиждень)
-  context sm_job content ServicememberJob
-  context right_to_bath_sessions_per_week content integer
-  rule right_to_bath_sessions_per_week fulfilled if is_enlisted_or_junior_nco =
-    match sm_job with
-    | Cook -> 7
-    | Baker -> 7
-    | _ -> 1
-
-  # Право на чисту зміну натільної/постільної білизни та рушників (разів на тиждень)
-  context right_to_clean_underwear_per_week content integer
-  rule right_to_clean_underwear_per_week fulfilled if is_enlisted_or_junior_nco =
-    match sm_job with
-    | Cook -> 2
-    | Baker -> 2
-    | _ -> 1
-
-  # --- Стаття 293: Права під час несення добового наряду ---
-  context is_free_shift_dnyuvalny content boolean
-  context is_duty_sergeant content boolean
-  
-  # Черговий (наприклад, сержант по роті) має право спати 4 години, не знімаючи взуття
-  context right_to_duty_sleep_hours content integer
-  rule right_to_duty_sleep_hours fulfilled if
-    is_enlisted_or_junior_nco and is_duty_sergeant
-    = 4
-    
-  # Днювальний вільної зміни має право спати від відбою до підйому роздягненим
-  context right_to_full_night_sleep_on_duty content boolean
-  rule right_to_full_night_sleep_on_duty fulfilled if
-    is_enlisted_or_junior_nco and is_free_shift_dnyuvalny
+  rule right_to_leave_base fulfilled if sm.status = ActiveServicememberOnContract
 ```
