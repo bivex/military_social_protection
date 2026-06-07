@@ -7,10 +7,50 @@
 
 declaration enumeration MilitaryPost:
   -- BrigadeCommander
-  -- DeputyCommanderLogistics
+  -- BrigadeChiefOfStaff
+  -- BrigadeDeputyCommander
+  -- BrigadeDeputyCommanderMoralPsych
+  -- BrigadeDeputyCommanderArmament
+  -- BrigadeDeputyCommanderLogistics
+  -- BrigadeChiefOfArtillery
+  -- BrigadeChiefOfAirDefense
+  -- BrigadeChiefOfService
+  -- BrigadeChiefOfEngineering
+  -- BrigadeChiefOfNBCProtection
+  -- BrigadeChiefOfMedicalService
+  -- BrigadeChiefOfFinance
+  -- BrigadeChiefOfPhysicalTraining
+  -- BrigadeChiefOfIntelligence
+  -- BrigadeChiefOfSignals
+  -- BrigadeChiefOfMetrology
+  -- BrigadeChiefOfRocketArtillery
+  -- BrigadeChiefOfArmor
+  -- BrigadeChiefOfAuto
+  -- BrigadeChiefOfFuel
+  -- BrigadeChiefOfFood
+  -- BrigadeChiefOfClothing
+  -- BrigadeLegalAdvisor
+  -- BrigadeChaplain
+  -- BrigadeChiefSergeant
   -- BattalionCommander
+  -- BattalionChiefOfStaff
+  -- BattalionDeputyCommander
+  -- BattalionDeputyCommanderMoralPsych
+  -- BattalionDeputyCommanderArmament
+  -- BattalionChiefOfMedicalService
+  -- BattalionChiefSergeant
   -- CompanyCommander
-  -- ServiceChiefWithWarehouse
+  -- CompanyDeputyCommander
+  -- CompanyDeputyCommanderMoralPsych
+  -- CompanyDeputyCommanderArmament
+  -- CompanyChiefSergeant
+  -- CompanySergeantMaterialSupport
+  -- CompanyTacticalMedInstructor
+  -- PlatoonCommander
+  -- PlatoonChiefSergeant
+  -- PlatoonInstructor
+  -- SquadCommander
+  -- PrivateSoldier
   -- OtherPost
 
 declaration structure BarracksRequirements:
