@@ -100,4 +100,10 @@ scope LeaveEntitlement:
   definition conditional_release_leave_limit under condition
     conditional_release_status = Yes and on_contract_service = Yes
     consequence equals Yes
+
+  definition annual_main_leave_days equals 0
+  definition annual_additional_leave_days equals 0
+  definition leave_pay_entitlement equals No
+  definition travel_cost_covered equals No
+  definition post_discharge_leave_granted equals No
 ```

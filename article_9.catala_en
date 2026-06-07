@@ -50,6 +50,14 @@ scope MonetaryAllowance:
   definition pow_benefit_amount under condition
     sm.status = POW or sm.status = Hostage or sm.status = Internee or sm.status = Missing
     consequence equals base_monthly_allowance
+
+  definition position_allowance equals 0.00
+  definition rank_allowance equals 0.00
+  definition monthly_additions equals 0.00
+  definition base_monthly_allowance equals 0.00
+  definition special_bonus equals 0.00
+  definition total_monthly_allowance equals 0.00
+  definition pow_benefit_amount equals 0.00
 ```
 
 ## Article 9-1 – Logistical provision
@@ -95,6 +103,13 @@ scope LogisticalProvision:
   definition medical_social_provision_gender_consideration under condition
     state_provision_policy_in_force = Yes
     consequence equals Yes
+
+  definition food_entitlement equals No
+  definition clothing_entitlement equals No
+  definition moving_assistance equals No
+  definition travel_daily_allowance equals No
+  definition expense_reimbursement equals No
+  definition medical_social_provision_gender_consideration equals No
 ```
 
 ## Article 9-2 – Wartime bonuses
@@ -121,4 +136,8 @@ scope WartimeBonus:
   definition total_wartime_compensation under condition
     martial_law_in_force = Yes and (sm.status = ActiveServicemember or sm.status = ReservistOnTraining or sm.status = Conscript)
     consequence equals additional_monthly_bonus + equipment_destruction_bonus
+
+  definition additional_monthly_bonus equals 0.00
+  definition equipment_destruction_bonus equals 0.00
+  definition total_wartime_compensation equals 0.00
 ```

@@ -49,4 +49,11 @@ scope EmploymentGuarantees:
   definition reemployment_priority_right under condition
     mobilized_or_special_period_draftee = Yes and completed_special_period_service = Yes
     consequence equals Yes
+
+  definition job_retoration_right equals No
+  definition unemployment_assistance_right equals No
+  definition social_adaptation_right equals No
+  definition reemployment_priority_right equals No
+  definition retraining_right equals No
+  definition financial_assistance_after_discharge equals 0.00
 ```

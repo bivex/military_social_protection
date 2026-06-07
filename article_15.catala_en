@@ -58,4 +58,13 @@ scope PensionAssistance:
   definition social_assistance_amount under condition
     household_income_per_capita < social_assistance_income_threshold and family_member.is_minor = Yes
     consequence equals social_assistance_base_rate
+
+  definition service_pension_eligible equals No
+  definition disability_pension_eligible equals No
+  definition family_pension_eligible equals No
+  definition social_assistance_eligible equals No
+  definition monthly_pension_amount equals 0
+  definition disability_pension_amount equals 0
+  definition family_pension_amount equals 0
+  definition social_assistance_amount equals 0
 ```

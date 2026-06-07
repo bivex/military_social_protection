@@ -49,4 +49,14 @@ scope CivilRights:
   definition legal_aid_right under condition
     protected_servicemember = Yes
     consequence equals Yes
+
+  definition voting_right equals No
+  definition election_right equals No
+  definition local_council_attached equals No
+  definition political_association_right equals No
+  definition strike_prohibited equals No
+  definition forced_non_service_prohibited equals No
+  definition information_right equals No
+  definition complaint_right equals No
+  definition legal_aid_right equals No
 ```

@@ -39,4 +39,10 @@ scope OneTimePaymentAmounts:
   definition payment_basis under condition
     death_record = Yes and cause_of_death_is_service = Yes
     consequence equals Yes
+
+  definition base_payment_amount equals 0
+  definition disability_payment_amount equals 0
+  definition family_payment_amount equals 0
+  definition calculated_payment equals 0
+  definition payment_basis equals No
 ```

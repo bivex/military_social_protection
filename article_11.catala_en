@@ -55,4 +55,12 @@ scope HealthcareEntitlement:
   definition infertility_preservation_right under condition
     (sm.status = ActiveServicemember or sm.status = ReservistOnTraining or sm.status = Conscript or sm.status = SpecialPeriod) and war_time_participant = Yes
     consequence equals Yes
+
+  definition free_military_medical_care equals No
+  definition psychological_support equals No
+  definition reintegration_program_entitled equals No
+  definition sanatorium_right equals No
+  definition free_sanatorium_after_hospital equals No
+  definition child_care_leave_medical equals No
+  definition infertility_preservation_right equals No
 ```

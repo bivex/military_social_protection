@@ -69,4 +69,19 @@ scope BenefitCompensation:
   definition medical_treatment_abroad_eligible under condition
     benefit_type = MedicalTreatmentAbroad and treatment_unavailable_domestically = Yes
     consequence equals Yes
+
+  definition transport_priority equals No
+  definition luggage_transport_eligible equals No
+  definition family_transport_eligible equals No
+  definition priority_hotel equals No
+  definition priority_telephone equals No
+  definition communication_benefit equals No
+  definition vehicle_certificate_eligible equals No
+  definition penalty_moratorium_eligible equals No
+  definition psychological_support_benefit_eligible equals No
+  definition medical_treatment_abroad_eligible equals No
+  definition benefit_entitlement equals No
+  definition benefit_amount equals 0
+  definition mail_benefit equals No
+  definition vehicle_benefit equals No
 ```

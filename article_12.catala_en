@@ -60,4 +60,11 @@ scope HousingEntitlement:
   definition housing_loan_entitlement under condition
     not_yet_received_housing_or_compensation = Yes and (sm.status = ActiveServicemember or sm.status = ReservistOnTraining or sm.status = Conscript)
     consequence equals Yes
+
+  definition housing_eligibility equals No
+  definition free_housing_entitlement equals 0
+  definition utility_discount_eligible equals No
+  definition social_housing_priority equals No
+  definition land_plot_entitlement equals No
+  definition housing_loan_entitlement equals No
 ```
