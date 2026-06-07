@@ -5,12 +5,27 @@
 ```catala
 # --- Додаткові структури та переліки для Статуту ---
 
+# Стаття 64: Посади для визначення термінів прийому/здачі справ
+declaration enumeration MilitaryPost:
+  -- BrigadeCommander
+  -- DeputyCommanderLogistics
+  -- BattalionCommander
+  -- CompanyCommander
+  -- ServiceChiefWithWarehouse
+  -- OtherPost
+
 # Стаття 135: Норми розміщення в казармі
 declaration structure BarracksRequirements:
   data min_area_sq_m content decimal
   data max_area_sq_m content decimal
   data min_air_vol_cubic_m content decimal
   data max_air_vol_cubic_m content decimal
+
+# Стаття 175: Типи приміщень для опалення
+declaration enumeration RoomType:
+  -- Barracks
+  -- MedicalFacility
+  -- OtherRoom
 
 # Стаття 199: Робочий тиждень
 declaration enumeration WorkingWeek:
@@ -23,6 +38,13 @@ declaration structure ConscriptLeave:
   data has_disciplinary_ban content YesNo
   data is_on_daily_duty content YesNo
 
+# Стаття 263-265: Спеціальності для санітарно-гігієнічних норм
+declaration enumeration ServicememberJob:
+  -- Cook
+  -- Baker
+  -- MechanicDriver
+  -- RegularDuty
+
 # --- Основний Scope Статуту ---
 
 scope InternalServiceStatute:
@@ -30,7 +52,6 @@ scope InternalServiceStatute:
   
   # --- Загальні положення ---
   
-  # Чи поширюється Статут на цю особу
   context subject_to_statute content boolean
   rule subject_to_statute fulfilled if
     sm.status = ActiveServicemember or
@@ -60,10 +81,20 @@ scope InternalServiceStatute:
   
   context commander_can_use_force content boolean
   rule commander_can_use_force fulfilled if
-    subject_to_statute and 
-    is_commander and 
-    is_combat_situation and 
-    subordinate_insubordinate
+    subject_to_statute and is_commander and is_combat_situation and subordinate_insubordinate
+
+  # --- Стаття 64: Терміни для прийняття і здавання посад (у днях) ---
+  context post_to_handover content MilitaryPost
+  context max_days_to_handover content integer
+
+  rule max_days_to_handover fulfilled =
+    match post_to_handover with
+    | BrigadeCommander -> 10
+    | DeputyCommanderLogistics -> 20
+    | BattalionCommander -> 5
+    | CompanyCommander -> 5
+    | ServiceChiefWithWarehouse -> 15
+    | OtherPost -> 0 # Встановлюється старшим командиром індивідуально
 
   # --- Стаття 135: Норми житлової площі в казармі на 1 особу ---
   context barracks_reqs content BarracksRequirements
@@ -72,6 +103,30 @@ scope InternalServiceStatute:
   rule barracks_reqs.min_air_vol_cubic_m fulfilled = 9.0
   rule barracks_reqs.max_air_vol_cubic_m fulfilled = 12.0
 
+  # --- Стаття 170: Санітарні норми (туалети) ---
+  context max_users_per_toilet_cabin content integer
+  rule max_users_per_toilet_cabin fulfilled = 12
+
+  context min_distance_outdoor_toilet_meters content integer
+  rule min_distance_outdoor_toilet_meters fulfilled = 100
+
+  # --- Стаття 175: Температурний режим у приміщеннях (взимку) ---
+  context room_type content RoomType
+  context min_temperature_celsius content integer
+
+  rule min_temperature_celsius fulfilled =
+    match room_type with
+    | Barracks -> 18
+    | MedicalFacility -> 20
+    | OtherRoom -> 0
+
+  # --- Стаття 193: Пожежна команда ---
+  context min_fire_squad_size content integer
+  rule min_fire_squad_size fulfilled = 5
+
+  context max_fire_squad_size content integer
+  rule max_fire_squad_size fulfilled = 18
+
   # --- Стаття 199: Тривалість робочого тижня залежно від статусу ---
   context working_week content WorkingWeek
   
@@ -79,8 +134,20 @@ scope InternalServiceStatute:
     match sm.status with
     | Conscript -> SixDays
     | ReservistOnTraining -> SixDays
-    # Для офіцерів та контрактників (за замовчуванням) - 5 днів
     | _ -> FiveDays
+
+  # --- Стаття 201: Розпорядок дня та часові обмеження ---
+  context max_hours_between_meals content integer
+  rule max_hours_between_meals fulfilled = 7
+
+  context min_sleep_hours content integer
+  rule min_sleep_hours fulfilled = 8
+
+  context min_rest_after_lunch_minutes content integer
+  rule min_rest_after_lunch_minutes fulfilled = 30
+
+  context min_rest_combat_alert_hours content integer
+  rule min_rest_combat_alert_hours fulfilled = 4
 
   # --- Стаття 217: Право на звільнення з розташування частини (для строковиків) ---
   context conscript_leave_info content ConscriptLeave
@@ -92,14 +159,38 @@ scope InternalServiceStatute:
     conscript_leave_info.has_disciplinary_ban = No and
     conscript_leave_info.is_on_daily_duty = No
   
-  # Якщо це не строковик, право на вихід за межі частини регулюється іншими статтями
   rule can_leave_base fulfilled if
     sm.status = ActiveServicememberOnContract or
     sm.status = OfficerDraftee
 
-  # --- Стаття 257: Звільнення від виконання службових обов'язків через хворобу ---
-  # Максимальний термін звільнення лікарем/фельдшером без госпіталізації (у добах)
+  # --- Стаття 257, 259: Звільнення через хворобу та лікування ---
   context max_sick_leave_days_by_doctor content integer
   rule max_sick_leave_days_by_doctor fulfilled = 6
+
+  context max_inpatient_days_medical_point content integer
+  rule max_inpatient_days_medical_point fulfilled = 14
+
+  # --- Стаття 263, 265: Лазне-пральне обслуговування ---
+  context sm_job content ServicememberJob
+
+  context required_bath_sessions_per_week content integer
+  rule required_bath_sessions_per_week fulfilled =
+    match sm_job with
+    | Cook -> 7 # Щоденний душ
+    | Baker -> 7 # Щоденний душ
+    | MechanicDriver -> 1 # + за потреби
+    | RegularDuty -> 1
+
+  context required_underwear_changes_per_week content integer
+  rule required_underwear_changes_per_week fulfilled =
+    match sm_job with
+    | Cook -> 2
+    | Baker -> 2
+    | MechanicDriver -> 1
+    | RegularDuty -> 1
+
+  # --- Стаття 293: Відпочинок чергового наряду ---
+  context duty_rest_hours content integer
+  rule duty_rest_hours fulfilled = 4
 
 ```
