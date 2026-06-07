@@ -553,7 +553,7 @@ scope Order260Premium:
 ```
 
 ## Section XXXVII — One-time wartime reward
-## 70,000 UAH per cumulative 30 days of combat missions
+## 70,000 UAH per each complete 30 days of combat missions
 
 ```catala
 declaration scope Order260OneTimeWartimeReward:
@@ -565,7 +565,7 @@ scope Order260OneTimeWartimeReward:
   label reward_due exception reward_default
   definition one_time_reward under condition
     martial_law_in_force = Yes and cumulative_combat_days >= 30
-    consequence equals $70000 * (cumulative_combat_days / 30)
+    consequence equals $70000 * Decimal.round_by_default of (cumulative_combat_days / 30)
 
   label reward_default
   definition one_time_reward equals $0
