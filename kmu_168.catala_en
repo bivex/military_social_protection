@@ -1,0 +1,126 @@
+## KMU Resolution #168 (28.02.2022) – Additional remuneration during martial law
+
+```catala
+declaration scope KMU168MilitaryRemuneration:
+  input sm content Servicemember
+  input martial_law_in_force content YesNo
+  input directly_in_combat content YesNo
+  input in_combat_area content YesNo
+  input on_front_line content YesNo
+  input front_line_periods content integer
+  input in_command_staff_of_combat_unit content YesNo
+  input performing_defense_tasks content YesNo
+  input in_training_unit content YesNo
+  input instructor_remuneration_category content integer
+  input wounded_in_disposal_over_2_months content YesNo
+  input is_conscript_service content YesNo
+  input is_cadet content YesNo
+  internal direct_combat_bonus content money
+  internal front_line_bonus content money
+  internal command_staff_bonus content money
+  internal defense_tasks_bonus content money
+  internal training_instructor_bonus content money
+  internal wounded_disposal_bonus content money
+  internal conscript_service_bonus content money
+  internal cadet_bonus content money
+  output total_additional_remuneration content money
+
+scope KMU168MilitaryRemuneration:
+  label direct_combat_bonus_cond exception default_direct_combat_bonus
+  definition direct_combat_bonus under condition
+    martial_law_in_force = Yes and directly_in_combat = Yes
+    consequence equals $100000
+
+  label front_line_bonus_cond exception default_front_line_bonus
+  definition front_line_bonus under condition
+    martial_law_in_force = Yes and on_front_line = Yes
+    consequence equals $70000 * front_line_periods
+
+  label command_staff_bonus_cond exception default_command_staff_bonus
+  definition command_staff_bonus under condition
+    martial_law_in_force = Yes and in_command_staff_of_combat_unit = Yes
+    consequence equals $50000
+
+  label defense_tasks_bonus_cond exception default_defense_tasks_bonus
+  definition defense_tasks_bonus under condition
+    martial_law_in_force = Yes and performing_defense_tasks = Yes
+    consequence equals $30000
+
+  label training_instructor_bonus_cond exception default_training_instructor_bonus
+  definition training_instructor_bonus under condition
+    martial_law_in_force = Yes and in_training_unit = Yes and instructor_remuneration_category = 1
+    consequence equals $15000
+
+  label training_instructor_bonus_cond_2 exception default_training_instructor_bonus
+  definition training_instructor_bonus under condition
+    martial_law_in_force = Yes and in_training_unit = Yes and instructor_remuneration_category = 2
+    consequence equals $20000
+
+  label training_instructor_bonus_cond_3 exception default_training_instructor_bonus
+  definition training_instructor_bonus under condition
+    martial_law_in_force = Yes and in_training_unit = Yes and instructor_remuneration_category = 3
+    consequence equals $25000
+
+  label training_instructor_bonus_cond_4 exception default_training_instructor_bonus
+  definition training_instructor_bonus under condition
+    martial_law_in_force = Yes and in_training_unit = Yes and instructor_remuneration_category = 4
+    consequence equals $30000
+
+  label wounded_disposal_bonus_cond exception default_wounded_disposal_bonus
+  definition wounded_disposal_bonus under condition
+    martial_law_in_force = Yes and wounded_in_disposal_over_2_months = Yes
+    consequence equals $20100
+
+  label conscript_service_bonus_cond exception default_conscript_service_bonus
+  definition conscript_service_bonus under condition
+    martial_law_in_force = Yes and is_conscript_service = Yes
+    consequence equals $6000
+
+  label cadet_bonus_cond exception default_cadet_bonus
+  definition cadet_bonus under condition
+    martial_law_in_force = Yes and is_cadet = Yes
+    consequence equals $2350
+
+  label total_additional_remuneration_cond exception default_total_additional_remuneration
+  definition total_additional_remuneration under condition
+    martial_law_in_force = Yes
+    consequence equals direct_combat_bonus + front_line_bonus + command_staff_bonus + defense_tasks_bonus + training_instructor_bonus + wounded_disposal_bonus + conscript_service_bonus + cadet_bonus
+
+  label default_direct_combat_bonus
+  definition direct_combat_bonus equals $0
+  label default_front_line_bonus
+  definition front_line_bonus equals $0
+  label default_command_staff_bonus
+  definition command_staff_bonus equals $0
+  label default_defense_tasks_bonus
+  definition defense_tasks_bonus equals $0
+  label default_training_instructor_bonus
+  definition training_instructor_bonus equals $0
+  label default_wounded_disposal_bonus
+  definition wounded_disposal_bonus equals $0
+  label default_conscript_service_bonus
+  definition conscript_service_bonus equals $0
+  label default_cadet_bonus
+  definition cadet_bonus equals $0
+  label default_total_additional_remuneration
+  definition total_additional_remuneration equals $0
+```
+
+## KMU Resolution #168 – Death benefit during martial law
+
+```catala
+declaration scope KMU168DeathBenefit:
+  input sm content Servicemember
+  input martial_law_in_force content YesNo
+  input death_during_martial_law content YesNo
+  output death_benefit_amount content money
+
+scope KMU168DeathBenefit:
+  label death_benefit_amount_cond exception default_death_benefit_amount
+  definition death_benefit_amount under condition
+    martial_law_in_force = Yes and death_during_martial_law = Yes
+    consequence equals $15000000
+
+  label default_death_benefit_amount
+  definition death_benefit_amount equals $0
+```

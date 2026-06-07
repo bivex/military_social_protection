@@ -1,0 +1,270 @@
+## KMU Resolution #704 (30.08.2017) — Base salary amount
+
+```catala
+declaration scope KMU704BaseAmount:
+  output base_salary_amount content money
+
+scope KMU704BaseAmount:
+  definition base_salary_amount equals $1762
+```
+
+## Appendix 12 — Conscript monthly allowance by tariff grade
+
+```catala
+declaration scope KMU704ConscriptAllowance:
+  input conscript_tariff_grade content ConscriptTariffGrade
+  output conscript_monthly_allowance content money
+
+scope KMU704ConscriptAllowance:
+  label grade_i exception default_conscript_allowance
+  definition conscript_monthly_allowance under condition
+    conscript_tariff_grade = Grade_I
+    consequence equals $350
+
+  label grade_ii exception default_conscript_allowance
+  definition conscript_monthly_allowance under condition
+    conscript_tariff_grade = Grade_II
+    consequence equals $420
+
+  label grade_iii exception default_conscript_allowance
+  definition conscript_monthly_allowance under condition
+    conscript_tariff_grade = Grade_III
+    consequence equals $490
+
+  label grade_iv exception default_conscript_allowance
+  definition conscript_monthly_allowance under condition
+    conscript_tariff_grade = Grade_IV
+    consequence equals $560
+
+  label grade_v exception default_conscript_allowance
+  definition conscript_monthly_allowance under condition
+    conscript_tariff_grade = Grade_V
+    consequence equals $630
+
+  label grade_vi exception default_conscript_allowance
+  definition conscript_monthly_allowance under condition
+    conscript_tariff_grade = Grade_VI
+    consequence equals $700
+
+  label default_conscript_allowance
+  definition conscript_monthly_allowance equals $0
+```
+
+## Appendix 14 — Rank monthly allowance
+
+```catala
+declaration scope KMU704RankAllowance:
+  input military_rank content MilitaryRank
+  output rank_monthly_allowance content money
+
+scope KMU704RankAllowance:
+  label rank_recruit exception default_rank_allowance
+  definition rank_monthly_allowance under condition
+    military_rank = Recruit
+    consequence equals $440
+
+  label rank_private exception default_rank_allowance
+  definition rank_monthly_allowance under condition
+    military_rank = Private
+    consequence equals $530
+
+  label rank_senior_soldier exception default_rank_allowance
+  definition rank_monthly_allowance under condition
+    military_rank = SeniorSoldier
+    consequence equals $600
+
+  label rank_junior_sergeant exception default_rank_allowance
+  definition rank_monthly_allowance under condition
+    military_rank = JuniorSergeant
+    consequence equals $670
+
+  label rank_sergeant exception default_rank_allowance
+  definition rank_monthly_allowance under condition
+    military_rank = Sergeant
+    consequence equals $740
+
+  label rank_senior_sergeant exception default_rank_allowance
+  definition rank_monthly_allowance under condition
+    military_rank = SeniorSergeant
+    consequence equals $810
+
+  label rank_chief_sergeant exception default_rank_allowance
+  definition rank_monthly_allowance under condition
+    military_rank = ChiefSergeant
+    consequence equals $880
+
+  label rank_staff_sergeant exception default_rank_allowance
+  definition rank_monthly_allowance under condition
+    military_rank = StaffSergeant
+    consequence equals $950
+
+  label rank_master_sergeant exception default_rank_allowance
+  definition rank_monthly_allowance under condition
+    military_rank = MasterSergeant
+    consequence equals $1020
+
+  label rank_senior_master_sergeant exception default_rank_allowance
+  definition rank_monthly_allowance under condition
+    military_rank = SeniorMasterSergeant
+    consequence equals $1040
+
+  label rank_chief_master_sergeant exception default_rank_allowance
+  definition rank_monthly_allowance under condition
+    military_rank = ChiefMasterSergeant
+    consequence equals $1060
+
+  label rank_junior_lieutenant exception default_rank_allowance
+  definition rank_monthly_allowance under condition
+    military_rank = JuniorLieutenant
+    consequence equals $1090
+
+  label rank_lieutenant exception default_rank_allowance
+  definition rank_monthly_allowance under condition
+    military_rank = Lieutenant
+    consequence equals $1130
+
+  label rank_senior_lieutenant exception default_rank_allowance
+  definition rank_monthly_allowance under condition
+    military_rank = SeniorLieutenant
+    consequence equals $1200
+
+  label rank_captain exception default_rank_allowance
+  definition rank_monthly_allowance under condition
+    military_rank = Captain
+    consequence equals $1270
+
+  label rank_major exception default_rank_allowance
+  definition rank_monthly_allowance under condition
+    military_rank = Major
+    consequence equals $1340
+
+  label rank_lieutenant_colonel exception default_rank_allowance
+  definition rank_monthly_allowance under condition
+    military_rank = LieutenantColonel
+    consequence equals $1410
+
+  label rank_colonel exception default_rank_allowance
+  definition rank_monthly_allowance under condition
+    military_rank = Colonel
+    consequence equals $1480
+
+  label rank_brigadier_general exception default_rank_allowance
+  definition rank_monthly_allowance under condition
+    military_rank = BrigadierGeneral
+    consequence equals $1550
+
+  label rank_major_general exception default_rank_allowance
+  definition rank_monthly_allowance under condition
+    military_rank = MajorGeneral
+    consequence equals $1620
+
+  label rank_lieutenant_general exception default_rank_allowance
+  definition rank_monthly_allowance under condition
+    military_rank = LieutenantGeneral
+    consequence equals $1690
+
+  label rank_general exception default_rank_allowance
+  definition rank_monthly_allowance under condition
+    military_rank = General
+    consequence equals $1760
+
+  label default_rank_allowance
+  definition rank_monthly_allowance equals $0
+```
+
+## Appendix 16 — Length of service allowance
+
+```catala
+declaration scope KMU704LengthOfServiceAllowance:
+  input service_years content integer
+  input position_salary content money
+  input rank_allowance content money
+  output length_of_service_allowance content money
+
+scope KMU704LengthOfServiceAllowance:
+  label los_25_plus exception default_los
+  definition length_of_service_allowance under condition
+    service_years >= 25
+    consequence equals (position_salary + rank_allowance) * 50 / 100
+
+  label los_20_25 exception default_los
+  definition length_of_service_allowance under condition
+    service_years >= 20 and service_years < 25
+    consequence equals (position_salary + rank_allowance) * 45 / 100
+
+  label los_15_20 exception default_los
+  definition length_of_service_allowance under condition
+    service_years >= 15 and service_years < 20
+    consequence equals (position_salary + rank_allowance) * 40 / 100
+
+  label los_10_15 exception default_los
+  definition length_of_service_allowance under condition
+    service_years >= 10 and service_years < 15
+    consequence equals (position_salary + rank_allowance) * 35 / 100
+
+  label los_5_10 exception default_los
+  definition length_of_service_allowance under condition
+    service_years >= 5 and service_years < 10
+    consequence equals (position_salary + rank_allowance) * 30 / 100
+
+  label los_1_5 exception default_los
+  definition length_of_service_allowance under condition
+    service_years >= 1 and service_years < 5
+    consequence equals (position_salary + rank_allowance) * 25 / 100
+
+  label default_los
+  definition length_of_service_allowance equals $0
+```
+
+## Service peculiarity bonus
+
+```catala
+declaration scope KMU704ServicePeculiarityBonus:
+  input position_salary content money
+  input rank_allowance content money
+  input special_service_category content YesNo
+  output service_peculiarity_bonus content money
+
+scope KMU704ServicePeculiarityBonus:
+  label special_100_pct exception default_peculiarity
+  definition service_peculiarity_bonus under condition
+    special_service_category = Yes
+    consequence equals (position_salary + rank_allowance) * 100 / 100
+
+  label default_peculiarity
+  definition service_peculiarity_bonus equals (position_salary + rank_allowance) * 65 / 100
+```
+
+## Total monetary provision
+
+```catala
+declaration scope KMU704TotalMonetaryProvision:
+  input position_or_conscript_allowance content money
+  input rank_allowance_amount content money
+  input length_of_service_amount content money
+  input service_peculiarity_amount content money
+  output total_monetary_provision content money
+
+scope KMU704TotalMonetaryProvision:
+  definition total_monetary_provision equals
+    position_or_conscript_allowance + rank_allowance_amount +
+    length_of_service_amount + service_peculiarity_amount
+```
+
+## Discharge assistance (Article 34)
+
+```catala
+declaration scope KMU704DischargeAssistance:
+  input position_salary content money
+  input is_orphan content YesNo
+  output discharge_assistance_amount content money
+
+scope KMU704DischargeAssistance:
+  label orphan_12x exception default_discharge
+  definition discharge_assistance_amount under condition
+    is_orphan = Yes
+    consequence equals position_salary * 12
+
+  label default_discharge
+  definition discharge_assistance_amount equals position_salary * 8
+```

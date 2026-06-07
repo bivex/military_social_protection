@@ -101,12 +101,37 @@ run_scope "LogisticalProvision" "{
   \"state_provision_policy_in_force\": \"No\"
 }"
 
-# 6. WartimeBonus (article 9-2)
+# 6. WartimeBonus (article 9-2) — generic wartime bonus scope
 run_scope "WartimeBonus" "{
   \"sm\": $SM,
   \"martial_law_in_force\": \"Yes\",
-  \"cmu_determined_amount\": 100000,
+  \"cmu_determined_amount\": 6000,
   \"destroyed_or_captured_enemy_equipment\": \"No\"
+}"
+
+# 6a. KMU168MilitaryRemuneration — specific amounts from KMU Resolution #168
+# Conscript not in combat: 6,000 UAH/month for service peculiarities
+run_scope "KMU168MilitaryRemuneration" "{
+  \"sm\": $SM,
+  \"martial_law_in_force\": \"Yes\",
+  \"directly_in_combat\": \"No\",
+  \"in_combat_area\": \"No\",
+  \"on_front_line\": \"No\",
+  \"front_line_periods\": 0,
+  \"in_command_staff_of_combat_unit\": \"No\",
+  \"performing_defense_tasks\": \"No\",
+  \"in_training_unit\": \"No\",
+  \"instructor_remuneration_category\": 0,
+  \"wounded_in_disposal_over_2_months\": \"No\",
+  \"is_conscript_service\": \"Yes\",
+  \"is_cadet\": \"No\"
+}"
+
+# 6b. KMU168DeathBenefit — 15M UAH death benefit during martial law
+run_scope "KMU168DeathBenefit" "{
+  \"sm\": $SM,
+  \"martial_law_in_force\": \"Yes\",
+  \"death_during_martial_law\": \"No\"
 }"
 
 # 7. LeaveEntitlement (article 10-1)

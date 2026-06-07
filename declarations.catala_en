@@ -68,6 +68,38 @@ declaration enumeration ProtectedPersonCategory:
   -- DeceasedFamily
   -- POWFamily
 
+declaration enumeration ConscriptTariffGrade:
+  -- Grade_I
+  -- Grade_II
+  -- Grade_III
+  -- Grade_IV
+  -- Grade_V
+  -- Grade_VI
+
+declaration enumeration MilitaryRank:
+  -- Recruit
+  -- Private
+  -- SeniorSoldier
+  -- JuniorSergeant
+  -- Sergeant
+  -- SeniorSergeant
+  -- ChiefSergeant
+  -- StaffSergeant
+  -- MasterSergeant
+  -- SeniorMasterSergeant
+  -- ChiefMasterSergeant
+  -- JuniorLieutenant
+  -- Lieutenant
+  -- SeniorLieutenant
+  -- Captain
+  -- Major
+  -- LieutenantColonel
+  -- Colonel
+  -- BrigadierGeneral
+  -- MajorGeneral
+  -- LieutenantGeneral
+  -- General
+
 declaration structure Servicemember:
   data status content ServicememberStatus
   data formation content ServicememberFormation
