@@ -1,0 +1,105 @@
+# Statute of Internal Service of the Armed Forces of Ukraine
+
+> Using declarations
+
+```catala
+# --- Додаткові структури та переліки для Статуту ---
+
+# Стаття 135: Норми розміщення в казармі
+declaration structure BarracksRequirements:
+  data min_area_sq_m content decimal
+  data max_area_sq_m content decimal
+  data min_air_vol_cubic_m content decimal
+  data max_air_vol_cubic_m content decimal
+
+# Стаття 199: Робочий тиждень
+declaration enumeration WorkingWeek:
+  -- FiveDays
+  -- SixDays
+
+# Стаття 217: Право на звільнення для строковиків
+declaration structure ConscriptLeave:
+  data has_taken_oath content YesNo
+  data has_disciplinary_ban content YesNo
+  data is_on_daily_duty content YesNo
+
+# --- Основний Scope Статуту ---
+
+scope InternalServiceStatute:
+  context sm content Servicemember
+  
+  # --- Загальні положення ---
+  
+  # Чи поширюється Статут на цю особу
+  context subject_to_statute content boolean
+  rule subject_to_statute fulfilled if
+    sm.status = ActiveServicemember or
+    sm.status = ActiveServicememberOnContract or
+    sm.status = Conscript or
+    sm.status = OfficerDraftee or
+    sm.status = ReservistOnTraining
+
+  # --- Стаття 22: Право на застосування зброї ---
+  context is_protecting_life content boolean
+  context is_detaining_criminal content boolean
+  context is_repelling_attack content boolean
+  context is_preventing_weapon_seizure content boolean
+
+  context right_to_use_weapons content boolean
+  rule right_to_use_weapons fulfilled if
+    subject_to_statute and
+    (is_protecting_life or 
+     is_detaining_criminal or 
+     is_repelling_attack or 
+     is_preventing_weapon_seizure)
+
+  # --- Стаття 22-1: Право командира на застосування сили/зброї в бою ---
+  context is_commander content boolean
+  context is_combat_situation content boolean
+  context subordinate_insubordinate content boolean
+  
+  context commander_can_use_force content boolean
+  rule commander_can_use_force fulfilled if
+    subject_to_statute and 
+    is_commander and 
+    is_combat_situation and 
+    subordinate_insubordinate
+
+  # --- Стаття 135: Норми житлової площі в казармі на 1 особу ---
+  context barracks_reqs content BarracksRequirements
+  rule barracks_reqs.min_area_sq_m fulfilled = 2.5
+  rule barracks_reqs.max_area_sq_m fulfilled = 4.0
+  rule barracks_reqs.min_air_vol_cubic_m fulfilled = 9.0
+  rule barracks_reqs.max_air_vol_cubic_m fulfilled = 12.0
+
+  # --- Стаття 199: Тривалість робочого тижня залежно від статусу ---
+  context working_week content WorkingWeek
+  
+  rule working_week fulfilled =
+    match sm.status with
+    | Conscript -> SixDays
+    | ReservistOnTraining -> SixDays
+    # Для офіцерів та контрактників (за замовчуванням) - 5 днів
+    | _ -> FiveDays
+
+  # --- Стаття 217: Право на звільнення з розташування частини (для строковиків) ---
+  context conscript_leave_info content ConscriptLeave
+  context can_leave_base content boolean
+  
+  rule can_leave_base fulfilled if
+    sm.status = Conscript and
+    conscript_leave_info.has_taken_oath = Yes and
+    conscript_leave_info.has_disciplinary_ban = No and
+    conscript_leave_info.is_on_daily_duty = No
+  
+  # Якщо це не строковик, право на вихід за межі частини регулюється іншими статтями
+  rule can_leave_base fulfilled if
+    sm.status = ActiveServicememberOnContract or
+    sm.status = OfficerDraftee
+
+  # --- Стаття 257: Звільнення від виконання службових обов'язків через хворобу ---
+  # Максимальний термін звільнення лікарем/фельдшером без госпіталізації (у добах)
+  context max_sick_leave_days_by_doctor content integer
+  rule max_sick_leave_days_by_doctor fulfilled = 6
+
+```
