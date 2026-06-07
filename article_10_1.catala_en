@@ -3,6 +3,22 @@ declaration scope LeaveEntitlement:
   input sm content Servicemember
   input leave_year content integer
   input current_year_discharge content YesNo
+  input mobilization_declared content YesNo
+  input martial_law_declared content YesNo
+  input defense_minister_decision content YesNo
+  input dismissal_not_unsuitable_not_convicted content YesNo
+  input annual_leave_not_yet_used content YesNo
+  input spouse_requests_simultaneous_leave content YesNo
+  input special_period_active content YesNo
+  input martial_law_active content YesNo
+  input mobilization_service_person content YesNo
+  input leaving_service_by_presidential_decision content YesNo
+  input annual_leave_unused content YesNo
+  input released_from_pow content YesNo
+  input servicemember_requests content YesNo
+  input conditional_release_status content YesNo
+  input on_contract_service content YesNo
+  input cmu_determined_max_15_days content integer
   internal spouse_leave_synchronized content YesNo
   internal discharge_year_leave content YesNo
   internal unused_leave_after_discharge_notice content YesNo
@@ -27,7 +43,7 @@ scope LeaveEntitlement:
 
   definition annual_additional_leave_days under condition
     (sm.status = ActiveServicemember or sm.status = ReservistOnTraining or sm.status = Conscript or sm.status = SpecialPeriod) and sm.is_basic_service = No
-    consequence equals CMU_determined_max_15_days
+    consequence equals cmu_determined_max_15_days
 
   definition leave_pay_entitlement under condition
     mobilization_declared = Yes or martial_law_declared = Yes or defense_minister_decision = Yes
@@ -74,7 +90,7 @@ scope LeaveEntitlement:
     consequence equals Yes
 
   definition death_leave_compensation under condition
-    servicemember.died_in_service = Yes
+    sm.died_in_service = Yes
     consequence equals Yes
 
   definition post_pow_leave_granted under condition

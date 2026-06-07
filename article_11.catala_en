@@ -10,6 +10,14 @@ declaration scope HealthcareEntitlement:
   input household_income_per_capita content money
   input child_sick content YesNo
   input child_hospitalization content YesNo
+  input family_member_is_protected content YesNo
+  input no_public_hospital_in_residence_area content YesNo
+  input actual_service_in_war_zones content YesNo
+  input unlawfully_deprived_liberty_and_recently_released content YesNo
+  input exceeded_once_per_year content YesNo
+  input post_stationary_treatment_per_military_medical_board content YesNo
+  input war_time_participant content YesNo
+  input child_age content integer
   internal reintegration_program_entitled content YesNo
   internal free_sanatorium_after_hospital content YesNo
   output free_military_medical_care content YesNo
@@ -21,7 +29,7 @@ declaration scope HealthcareEntitlement:
 scope HealthcareEntitlement:
   definition free_military_medical_care under condition
     sm.status = ActiveServicemember or sm.status = ReservistOnTraining or sm.status = Conscript or sm.status = SpecialPeriod
-    or family_member_is_protected = Yes and no_public_hospital_in_residence_area = Yes
+    or (family_member_is_protected = Yes and no_public_hospital_in_residence_area = Yes)
     consequence equals Yes
 
   definition psychological_support under condition
@@ -33,7 +41,7 @@ scope HealthcareEntitlement:
     consequence equals Yes
 
   definition sanatorium_right under condition
-    (sm.status = ActiveServicemember or sm.status = ReservistOnTraining or sm.status = Conscript or sm.status = SpecialPeriod) and not exceeded_once_per_year = Yes
+    (sm.status = ActiveServicemember or sm.status = ReservistOnTraining or sm.status = Conscript or sm.status = SpecialPeriod) and exceeded_once_per_year = No
     consequence equals Yes
 
   definition free_sanatorium_after_hospital under condition

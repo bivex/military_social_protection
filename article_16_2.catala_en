@@ -10,6 +10,9 @@ declaration scope OneTimePaymentAmounts:
   input is_pow content YesNo
   input within_one_year_of_discharge content YesNo
   input eligible_family_count content integer
+  input base_one_time_payment_rate content money
+  input disability_group_amount content money
+  input per_family_member_payment_rate content money
   output base_payment_amount content money
   output disability_payment_amount content money
   output family_payment_amount content money

@@ -10,6 +10,16 @@ declaration scope HousingEntitlement:
   input has_service_housing content YesNo
   input household_income_per_capita content money
   input on_housing_waiting_list content YesNo
+  input disabled_during_service_or_service_illness content YesNo
+  input dismissed_for_age content YesNo
+  input dismissed_due_to_redundancy content YesNo
+  input fair_market_value_or_state_subsidized_value content money
+  input housing_eligible_person_applies_for_social content YesNo
+  input disabled_service_person content YesNo
+  input family_of_fallen content YesNo
+  input not_yet_received_housing_or_compensation content YesNo
+  input protected_person content ProtectedPersonCategory
+  input cmu_social_benefit_income_limit content money
   output housing_eligibility content YesNo
   output free_housing_entitlement content money
   output utility_discount_eligible content YesNo
@@ -35,7 +45,7 @@ scope HousingEntitlement:
     consequence equals fair_market_value_or_state_subsidized_value
 
   definition utility_discount_eligible under condition
-    (protected_person = disabled_service or protected_person = deceased_family or protected_person = POW_family) and household_income_per_capita <= CMU_social_benefit_income_limit
+    (protected_person = DisabledService or protected_person = DeceasedFamily or protected_person = POWFamily) and household_income_per_capita <= cmu_social_benefit_income_limit
     consequence equals Yes
 
   definition social_housing_priority under condition

@@ -5,12 +5,16 @@ declaration enumeration YesNo:
 
 declaration enumeration ServicememberStatus:
   -- ActiveServicemember
+  -- ActiveServicememberOnContract
   -- ReservistOnTraining
   -- Conscript
   -- OfficerDraftee
   -- SpecialPeriod
   -- Demobilized
-  -- POWorHostageOrInterneeOrMissing
+  -- POW
+  -- Hostage
+  -- Internee
+  -- Missing
   -- DisabledVeteran
   -- DeceasedServicemember
   -- DismissedHealth
@@ -25,6 +29,7 @@ declaration enumeration ServicememberFormation:
   -- SZRU
   -- SBU
   -- DSSZI
+  -- SpecialOperationsForces
   -- OtherLegalFormation
   -- OtherLawEnforcementSpecial
   -- IntelligenceMoD
@@ -54,6 +59,15 @@ declaration enumeration BenefitType:
   -- FreeEducation
   -- PriorityEducation
 
+declaration enumeration DisabilityOrigin:
+  -- ServiceRelated
+  -- NonServiceRelated
+
+declaration enumeration ProtectedPersonCategory:
+  -- DisabledService
+  -- DeceasedFamily
+  -- POWFamily
+
 declaration structure Servicemember:
   data status content ServicememberStatus
   data formation content ServicememberFormation
@@ -63,6 +77,10 @@ declaration structure Servicemember:
   data disability_cause content YesNo
   data death_record content YesNo
   data serving_abroad content YesNo
+  data is_basic_service content YesNo
+  data is_academy_student content YesNo
+  data has_spouse content YesNo
+  data died_in_service content YesNo
 
 declaration structure FamilyMember:
   data relationship content integer
@@ -70,4 +88,5 @@ declaration structure FamilyMember:
   data is_disabled_childhood content YesNo
   data is_incapacitated content YesNo
   data monthly_income content money
+  data requests_adaptation content YesNo
 ```

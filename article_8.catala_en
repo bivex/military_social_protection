@@ -1,6 +1,18 @@
 ```catala
 declaration scope EmploymentGuarantees:
   input sm content Servicemember
+  input family_member content FamilyMember
+  input pre_draft_employer_is_filled content YesNo
+  input within_one_month_of_discharge content YesNo
+  input discharged_without_pension_right content YesNo
+  input average_monthly_salary_of_last_employment content money
+  input dismissed_for_health_after_long_service content YesNo
+  input conscript_not_employed_before_draft content YesNo
+  input discharged_due_to_redundancy content YesNo
+  input positive_service_characteristics content YesNo
+  input last_year_before_discharge content YesNo
+  input completed_special_period_service content YesNo
+  input mobilized_or_special_period_draftee content YesNo
   output job_retoration_right content YesNo
   output job_retention_period_months content integer
   output unemployment_assistance_right content YesNo
@@ -19,22 +31,22 @@ scope EmploymentGuarantees:
     consequence equals Yes
 
   definition financial_assistance_after_discharge under condition
-    discharged_without_pension_right and within_one_month_of_discharge
+    discharged_without_pension_right = Yes and within_one_month_of_discharge = Yes
     consequence equals average_monthly_salary_of_last_employment
 
   definition unemployment_assistance_right under condition
-    discharged_without_pension_right
+    discharged_without_pension_right = Yes
     consequence equals Yes
 
   definition social_adaptation_right under condition
-    discharged_due_to_redundancy or dismissed_for_health_after_long_service or conscript_not_employed_before_draft or family_member.requests_adaptation = Yes
+    discharged_due_to_redundancy = Yes or dismissed_for_health_after_long_service = Yes or conscript_not_employed_before_draft = Yes or family_member.requests_adaptation = Yes
     consequence equals Yes
 
   definition retraining_right under condition
-    sm.service_years >= 10 and positive_service_characteristics and last_year_before_discharge
+    sm.service_years >= 10 and positive_service_characteristics = Yes and last_year_before_discharge = Yes
     consequence equals Yes
 
   definition reemployment_priority_right under condition
-    mobilized_or_special_period_draftee and completed_special_period_service
+    mobilized_or_special_period_draftee = Yes and completed_special_period_service = Yes
     consequence equals Yes
 ```

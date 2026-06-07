@@ -11,6 +11,12 @@ declaration scope PensionAssistance:
   input is_family_of_fallen content YesNo
   input is_pow content YesNo
   input cause_of_death_is_service content YesNo
+  input disability_caused_by_service content YesNo
+  input base_service_pension_rate content money
+  input base_disability_pension_rate content money
+  input base_family_pension_rate content money
+  input social_assistance_base_rate content money
+  input social_assistance_income_threshold content money
   output service_pension_eligible content YesNo
   output disability_pension_eligible content YesNo
   output family_pension_eligible content YesNo
@@ -34,7 +40,7 @@ scope PensionAssistance:
     consequence equals Yes
 
   definition social_assistance_eligible under condition
-    household_income_per_capita < 5000 and family_member.is_minor = Yes
+    household_income_per_capita < social_assistance_income_threshold and family_member.is_minor = Yes
     consequence equals Yes
 
   definition monthly_pension_amount under condition
@@ -50,6 +56,6 @@ scope PensionAssistance:
     consequence equals base_family_pension_rate
 
   definition social_assistance_amount under condition
-    household_income_per_capita < 5000 and family_member.is_minor = Yes
+    household_income_per_capita < social_assistance_income_threshold and family_member.is_minor = Yes
     consequence equals social_assistance_base_rate
 ```

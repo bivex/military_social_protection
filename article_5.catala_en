@@ -1,6 +1,12 @@
 ```catala
 declaration scope CivilRights:
   input sm content Servicemember
+  input is_nationality_Ukraine content YesNo
+  input serving_within_Ukraine content YesNo
+  input assigned_non_military_non_disaster_task content YesNo
+  input is_protected_person content YesNo
+  input unlawful_military_authority_decision content YesNo
+  input protected_servicemember content YesNo
   output voting_right content YesNo
   output election_right content YesNo
   output local_council_attached content YesNo

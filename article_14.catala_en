@@ -7,6 +7,13 @@ declaration scope BenefitCompensation:
   input disability_group content integer
   input is_family_of_fallen content YesNo
   input is_pow content YesNo
+  input change_of_service_post content YesNo
+  input family_reunion_travel content YesNo
+  input travel_for_medical_or_official_purpose content YesNo
+  input protected_household content YesNo
+  input owner_is_war_participant content YesNo
+  input war_experience_verified content YesNo
+  input treatment_unavailable_domestically content YesNo
   internal luggage_transport_eligible content YesNo
   internal family_transport_eligible content YesNo
   internal vehicle_certificate_eligible content YesNo

@@ -3,6 +3,17 @@
 ```catala
 declaration scope MonetaryAllowance:
   input sm content Servicemember
+  input has_position content YesNo
+  input has_military_rank content YesNo
+  input position_base_rate content money
+  input service_rank_factor content integer
+  input rank_base_rate content money
+  input seniority_factor content integer
+  input length_of_service_premium content money
+  input hazard_duty_surcharge content money
+  input qualification_surcharge content money
+  input academic_surcharge content money
+  input sso_bonus_rate content integer
   internal position_allowance content money
   internal rank_allowance content money
   internal monthly_additions content money
@@ -29,8 +40,8 @@ scope MonetaryAllowance:
     consequence equals position_allowance + rank_allowance + monthly_additions
 
   definition special_bonus under condition
-    sm.service_formation = SpecialOperationsForces and has_position = Yes and sm.status = ActiveServicemember
-    consequence equals base_monthly_allowance * SSO_bonus_rate
+    sm.formation = SpecialOperationsForces and has_position = Yes and sm.status = ActiveServicemember
+    consequence equals base_monthly_allowance * sso_bonus_rate
 
   definition total_monthly_allowance under condition
     has_position = Yes and sm.status = ActiveServicemember
@@ -47,13 +58,16 @@ scope MonetaryAllowance:
 declaration scope LogisticalProvision:
   input sm content Servicemember
   input is_draftee_training content YesNo
+  input transferred_to_new_post content YesNo
+  input on_official_travel_ukraine_or_abroad content YesNo
+  input state_provision_policy_in_force content YesNo
   internal family_transfer_allowance content YesNo
   internal medical_social_provision_gender_consideration content YesNo
   output food_entitlement content YesNo
   output clothing_entitlement content YesNo
-  output moving_assistance content money
-  output travel_daily_allowance content money
-  output expense_reimbursement content money
+  output moving_assistance content YesNo
+  output travel_daily_allowance content YesNo
+  output expense_reimbursement content YesNo
 
 scope LogisticalProvision:
   definition food_entitlement under condition
@@ -89,18 +103,20 @@ scope LogisticalProvision:
 declaration scope WartimeBonus:
   input sm content Servicemember
   input martial_law_in_force content YesNo
+  input cmu_determined_amount content money
+  input destroyed_or_captured_enemy_equipment content YesNo
   internal additional_monthly_bonus content money
-  internal equipment_destruction_bonus content YesNo
+  internal equipment_destruction_bonus content money
   output total_wartime_compensation content money
 
 scope WartimeBonus:
   definition additional_monthly_bonus under condition
     martial_law_in_force = Yes and (sm.status = ActiveServicemember or sm.status = ReservistOnTraining or sm.status = Conscript)
-    consequence equals CMU_determined_amount
+    consequence equals cmu_determined_amount
 
   definition equipment_destruction_bonus under condition
     martial_law_in_force = Yes and (sm.status = ActiveServicemember or sm.status = ReservistOnTraining or sm.status = Conscript) and destroyed_or_captured_enemy_equipment = Yes
-    consequence equals Yes
+    consequence equals cmu_determined_amount
 
   definition total_wartime_compensation under condition
     martial_law_in_force = Yes and (sm.status = ActiveServicemember or sm.status = ReservistOnTraining or sm.status = Conscript)
