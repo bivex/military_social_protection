@@ -23,41 +23,55 @@ declaration scope MonetaryAllowance:
   output pow_benefit_amount content money
 
 scope MonetaryAllowance:
+  label position_allowance_cond exception default_position_allowance
   definition position_allowance under condition
     has_position = Yes and sm.status = ActiveServicemember
     consequence equals position_base_rate * service_rank_factor
 
+  label rank_allowance_cond exception default_rank_allowance
   definition rank_allowance under condition
     has_military_rank = Yes
     consequence equals rank_base_rate * seniority_factor
 
+  label monthly_additions_cond exception default_monthly_additions
   definition monthly_additions under condition
     sm.status = ActiveServicemember
     consequence equals length_of_service_premium + hazard_duty_surcharge + qualification_surcharge + academic_surcharge
 
+  label base_monthly_allowance_cond exception default_base_monthly_allowance
   definition base_monthly_allowance under condition
     has_position = Yes and sm.status = ActiveServicemember
     consequence equals position_allowance + rank_allowance + monthly_additions
 
+  label special_bonus_cond exception default_special_bonus
   definition special_bonus under condition
     sm.formation = SpecialOperationsForces and has_position = Yes and sm.status = ActiveServicemember
     consequence equals base_monthly_allowance * sso_bonus_rate
 
+  label total_monthly_allowance_cond exception default_total_monthly_allowance
   definition total_monthly_allowance under condition
     has_position = Yes and sm.status = ActiveServicemember
     consequence equals base_monthly_allowance + special_bonus
 
+  label pow_benefit_amount_cond exception default_pow_benefit_amount
   definition pow_benefit_amount under condition
     sm.status = POW or sm.status = Hostage or sm.status = Internee or sm.status = Missing
     consequence equals base_monthly_allowance
 
-  definition position_allowance equals 0.00
-  definition rank_allowance equals 0.00
-  definition monthly_additions equals 0.00
-  definition base_monthly_allowance equals 0.00
-  definition special_bonus equals 0.00
-  definition total_monthly_allowance equals 0.00
-  definition pow_benefit_amount equals 0.00
+  label default_position_allowance
+  definition position_allowance equals $0
+  label default_rank_allowance
+  definition rank_allowance equals $0
+  label default_monthly_additions
+  definition monthly_additions equals $0
+  label default_base_monthly_allowance
+  definition base_monthly_allowance equals $0
+  label default_special_bonus
+  definition special_bonus equals $0
+  label default_total_monthly_allowance
+  definition total_monthly_allowance equals $0
+  label default_pow_benefit_amount
+  definition pow_benefit_amount equals $0
 ```
 
 ## Article 9-1 – Logistical provision
@@ -78,37 +92,49 @@ declaration scope LogisticalProvision:
   output expense_reimbursement content YesNo
 
 scope LogisticalProvision:
+  label food_entitlement_cond exception default_food_entitlement
   definition food_entitlement under condition
     sm.status = ActiveServicemember or sm.status = ReservistOnTraining or sm.status = Conscript
     consequence equals Yes
 
+  label clothing_entitlement_cond exception default_clothing_entitlement
   definition clothing_entitlement under condition
     sm.status = ActiveServicemember
     consequence equals Yes
 
+  label moving_assistance_cond exception default_moving_assistance
   definition moving_assistance under condition
     (sm.status = ActiveServicememberOnContract or sm.status = OfficerDraftee or sm.status = ActiveServicemember) and transferred_to_new_post = Yes
     consequence equals Yes
 
   definition family_transfer_allowance equals Yes
 
+  label travel_daily_allowance_cond exception default_travel_daily_allowance
   definition travel_daily_allowance under condition
     (sm.status = ActiveServicememberOnContract or sm.status = OfficerDraftee or sm.status = ActiveServicemember) and transferred_to_new_post = Yes
     consequence equals Yes
 
+  label expense_reimbursement_cond exception default_expense_reimbursement
   definition expense_reimbursement under condition
     on_official_travel_ukraine_or_abroad = Yes
     consequence equals Yes
 
+  label medical_social_provision_gender_consideration_cond exception default_medical_social_provision_gender_consideration
   definition medical_social_provision_gender_consideration under condition
     state_provision_policy_in_force = Yes
     consequence equals Yes
 
+  label default_food_entitlement
   definition food_entitlement equals No
+  label default_clothing_entitlement
   definition clothing_entitlement equals No
+  label default_moving_assistance
   definition moving_assistance equals No
+  label default_travel_daily_allowance
   definition travel_daily_allowance equals No
+  label default_expense_reimbursement
   definition expense_reimbursement equals No
+  label default_medical_social_provision_gender_consideration
   definition medical_social_provision_gender_consideration equals No
 ```
 
@@ -125,19 +151,25 @@ declaration scope WartimeBonus:
   output total_wartime_compensation content money
 
 scope WartimeBonus:
+  label additional_monthly_bonus_cond exception default_additional_monthly_bonus
   definition additional_monthly_bonus under condition
     martial_law_in_force = Yes and (sm.status = ActiveServicemember or sm.status = ReservistOnTraining or sm.status = Conscript)
     consequence equals cmu_determined_amount
 
+  label equipment_destruction_bonus_cond exception default_equipment_destruction_bonus
   definition equipment_destruction_bonus under condition
     martial_law_in_force = Yes and (sm.status = ActiveServicemember or sm.status = ReservistOnTraining or sm.status = Conscript) and destroyed_or_captured_enemy_equipment = Yes
     consequence equals cmu_determined_amount
 
+  label total_wartime_compensation_cond exception default_total_wartime_compensation
   definition total_wartime_compensation under condition
     martial_law_in_force = Yes and (sm.status = ActiveServicemember or sm.status = ReservistOnTraining or sm.status = Conscript)
     consequence equals additional_monthly_bonus + equipment_destruction_bonus
 
-  definition additional_monthly_bonus equals 0.00
-  definition equipment_destruction_bonus equals 0.00
-  definition total_wartime_compensation equals 0.00
+  label default_additional_monthly_bonus
+  definition additional_monthly_bonus equals $0
+  label default_equipment_destruction_bonus
+  definition equipment_destruction_bonus equals $0
+  label default_total_wartime_compensation
+  definition total_wartime_compensation equals $0
 ```

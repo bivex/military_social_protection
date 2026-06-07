@@ -28,6 +28,7 @@ declaration scope HousingEntitlement:
   output housing_loan_entitlement content YesNo
 
 scope HousingEntitlement:
+  label housing_eligibility_cond exception default_housing_eligibility
   definition housing_eligibility under condition
     sm.calendar_service_years >= 20
     or disabled_during_service_or_service_illness = Yes
@@ -36,6 +37,7 @@ scope HousingEntitlement:
     or is_family_of_fallen = Yes
     consequence equals Yes
 
+  label free_housing_entitlement_cond exception default_free_housing_entitlement
   definition free_housing_entitlement under condition
     sm.calendar_service_years >= 20
     or disabled_during_service_or_service_illness = Yes
@@ -44,27 +46,37 @@ scope HousingEntitlement:
     or is_family_of_fallen = Yes
     consequence equals fair_market_value_or_state_subsidized_value
 
+  label utility_discount_eligible_cond exception default_utility_discount_eligible
   definition utility_discount_eligible under condition
     (protected_person = DisabledService or protected_person = DeceasedFamily or protected_person = POWFamily) and household_income_per_capita <= cmu_social_benefit_income_limit
     consequence equals Yes
 
+  label social_housing_priority_cond exception default_social_housing_priority
   definition social_housing_priority under condition
     (sm.calendar_service_years >= 20 or disabled_during_service_or_service_illness = Yes or dismissed_for_age = Yes or dismissed_due_to_redundancy = Yes or is_family_of_fallen = Yes)
     and housing_eligible_person_applies_for_social = Yes
     consequence equals Yes
 
+  label land_plot_entitlement_cond exception default_land_plot_entitlement
   definition land_plot_entitlement under condition
     sm.status = ActiveServicemember or disabled_service_person = Yes or family_of_fallen = Yes
     consequence equals Yes
 
+  label housing_loan_entitlement_cond exception default_housing_loan_entitlement
   definition housing_loan_entitlement under condition
     not_yet_received_housing_or_compensation = Yes and (sm.status = ActiveServicemember or sm.status = ReservistOnTraining or sm.status = Conscript)
     consequence equals Yes
 
+  label default_housing_eligibility
   definition housing_eligibility equals No
-  definition free_housing_entitlement equals 0
+  label default_free_housing_entitlement
+  definition free_housing_entitlement equals $0
+  label default_utility_discount_eligible
   definition utility_discount_eligible equals No
+  label default_social_housing_priority
   definition social_housing_priority equals No
+  label default_land_plot_entitlement
   definition land_plot_entitlement equals No
+  label default_housing_loan_entitlement
   definition housing_loan_entitlement equals No
 ```

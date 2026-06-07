@@ -63,8 +63,8 @@ scope PensionAssistance:
   definition disability_pension_eligible equals No
   definition family_pension_eligible equals No
   definition social_assistance_eligible equals No
-  definition monthly_pension_amount equals 0
-  definition disability_pension_amount equals 0
-  definition family_pension_amount equals 0
-  definition social_assistance_amount equals 0
+  definition monthly_pension_amount equals $0
+  definition disability_pension_amount equals $0
+  definition family_pension_amount equals $0
+  definition social_assistance_amount equals $0
 ```

@@ -55,5 +55,5 @@ scope EmploymentGuarantees:
   definition social_adaptation_right equals No
   definition reemployment_priority_right equals No
   definition retraining_right equals No
-  definition financial_assistance_after_discharge equals 0.00
+  definition financial_assistance_after_discharge equals $0
 ```

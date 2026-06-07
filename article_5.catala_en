@@ -18,45 +18,61 @@ declaration scope CivilRights:
   output legal_aid_right content YesNo
 
 scope CivilRights:
+  label voting_right_cond exception default_voting_right
   definition voting_right under condition
     (sm.status = ActiveServicemember or sm.status = ReservistOnTraining or sm.status = Conscript or sm.status = OfficerDraftee or sm.status = SpecialPeriod) and is_nationality_Ukraine = Yes and serving_within_Ukraine = Yes
     consequence equals Yes
 
+  label election_right_cond exception default_election_right
   definition election_right under condition
     (sm.status = ActiveServicemember or sm.status = ReservistOnTraining or sm.status = Conscript or sm.status = OfficerDraftee or sm.status = SpecialPeriod) and is_nationality_Ukraine = Yes and serving_within_Ukraine = Yes
     consequence equals Yes
 
+  label political_association_right_cond exception default_political_association_right
   definition political_association_right under condition
     sm.status = ActiveServicemember or sm.status = ReservistOnTraining or sm.status = Conscript or sm.status = OfficerDraftee or sm.status = SpecialPeriod
     consequence equals Yes
 
+  label strike_prohibited_cond exception default_strike_prohibited
   definition strike_prohibited under condition
     sm.status = ActiveServicemember or sm.status = ReservistOnTraining or sm.status = Conscript or sm.status = OfficerDraftee or sm.status = SpecialPeriod
     consequence equals Yes
 
+  label forced_non_service_prohibited_cond exception default_forced_non_service_prohibited
   definition forced_non_service_prohibited under condition
     assigned_non_military_non_disaster_task = Yes
     consequence equals Yes
 
+  label information_right_cond exception default_information_right
   definition information_right under condition
     is_protected_person = Yes
     consequence equals Yes
 
+  label complaint_right_cond exception default_complaint_right
   definition complaint_right under condition
     unlawful_military_authority_decision = Yes
     consequence equals Yes
 
+  label legal_aid_right_cond exception default_legal_aid_right
   definition legal_aid_right under condition
     protected_servicemember = Yes
     consequence equals Yes
 
+  label default_voting_right
   definition voting_right equals No
+  label default_election_right
   definition election_right equals No
   definition local_council_attached equals No
+  label default_political_association_right
   definition political_association_right equals No
+  label default_strike_prohibited
   definition strike_prohibited equals No
+  label default_forced_non_service_prohibited
   definition forced_non_service_prohibited equals No
+  label default_information_right
   definition information_right equals No
+  label default_complaint_right
   definition complaint_right equals No
+  label default_legal_aid_right
   definition legal_aid_right equals No
 ```

@@ -37,22 +37,27 @@ declaration scope LeaveEntitlement:
   output post_discharge_leave_granted content YesNo
 
 scope LeaveEntitlement:
+  label annual_main_leave_days_cond exception default_annual_main_leave_days
   definition annual_main_leave_days under condition
     not (sm.is_basic_service = Yes or sm.is_academy_student = Yes)
     consequence equals 30
 
+  label annual_additional_leave_days_cond exception default_annual_additional_leave_days
   definition annual_additional_leave_days under condition
     (sm.status = ActiveServicemember or sm.status = ReservistOnTraining or sm.status = Conscript or sm.status = SpecialPeriod) and sm.is_basic_service = No
     consequence equals cmu_determined_max_15_days
 
+  label leave_pay_entitlement_cond exception default_leave_pay_entitlement
   definition leave_pay_entitlement under condition
     mobilization_declared = Yes or martial_law_declared = Yes or defense_minister_decision = Yes
     consequence equals Yes
 
+  label travel_cost_covered_cond exception default_travel_cost_covered
   definition travel_cost_covered under condition
     mobilization_declared = Yes or martial_law_declared = Yes or defense_minister_decision = Yes
     consequence equals Yes
 
+  label post_discharge_leave_granted_cond exception default_post_discharge_leave_granted
   definition post_discharge_leave_granted under condition
     dismissal_not_unsuitable_not_convicted = Yes and annual_leave_not_yet_used = Yes
     consequence equals Yes
@@ -101,9 +106,14 @@ scope LeaveEntitlement:
     conditional_release_status = Yes and on_contract_service = Yes
     consequence equals Yes
 
+  label default_annual_main_leave_days
   definition annual_main_leave_days equals 0
+  label default_annual_additional_leave_days
   definition annual_additional_leave_days equals 0
+  label default_leave_pay_entitlement
   definition leave_pay_entitlement equals No
+  label default_travel_cost_covered
   definition travel_cost_covered equals No
+  label default_post_discharge_leave_granted
   definition post_discharge_leave_granted equals No
 ```
