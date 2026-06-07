@@ -4,7 +4,7 @@ set +e
 
 DIR="$(cd "$(dirname "$0")" && pwd)"
 cd "$DIR"
-MAIN="main.catala_en"
+MAIN="mil_soc_law/main.catala_en"
 
 # Shared servicemember struct - Conscript, 2 months, ZSU
 SM='{"status":"Conscript","formation":"ZSU","service_years":0,"calendar_service_years":0,"monthly_allowance":0,"disability_cause":"No","death_record":"No","serving_abroad":"No","is_basic_service":"Yes","is_academy_student":"No","has_spouse":"No","died_in_service":"No"}'
