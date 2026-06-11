@@ -1,23 +1,30 @@
 # Ukrposhta Sending Proof Verification (ПКМУ № 270)
 #
 # Models the legal requirements of Cabinet of Ministers Resolution No. 270 
-# ("Правила надання послуг поштового зв'язку") to determine if a postal mailing 
-# constitutes legally binding proof of document delivery.
+# ("Правила надання послуг поштового зв'язку", в редакції ПКМУ № 1071 від 10.10.2023)
+# to determine if a postal mailing constitutes legally binding proof of document delivery.
+#
+# Legal Citations:
+# - Пункт 2 (підпункт 13): Рекомендоване поштове відправлення відстежується в системі
+#   та вручається з підтвердженням вручення.
+# - Пункт 8: Поділ відправлень на прості та реєстровані (рекомендовані та з оголошеною цінністю).
+# - Пункт 17: Послуга опису вкладення полягає в підтвердженні вмісту відправлення 
+#   із зазначенням його індивідуальних ознак (кількість, вид).
+# - Пункт 32: Обов'язковість зазначення найменування та адреси одержувача і відправника.
 
 ```catala
 declaration scope UkrposhtaSendingProof:
   # ---- Inputs ----
-  # Para 19: Only registered (рекомендований) or valuable (з оголошеною цінністю) 
-  # mail is tracked and receipted.
+  # ПКМУ № 270, Пункт 8 & Пункт 2(13)
   input is_registered_or_valuable_mail content boolean
-  # Para 58, 59: Inventory description (опис вкладення) Form 107
+  # ПКМУ № 270, Пункт 17 (опис вкладення)
   input has_blank_form_107_inventory content boolean
   input inventory_completed_in_duplicate content boolean
   input inventory_stamped_and_signed_by_operator content boolean
-  # Receipt/чек confirming the transaction
+  # ПКМУ № 270, Пункт 12 & 32 (чек та реквізити одержувача)
   input receipt_issued_by_operator content boolean
   input receipt_specifies_correct_recipient content boolean
-  # 13-digit barcode tracker (ШПІ)
+  # ПКМУ № 270, Пункт 2(13) (відстеження та підтвердження вручення)
   input has_13_digit_tracking_number content boolean
   input tracking_status_delivered content boolean
   input delivery_signature_obtained content boolean
@@ -31,7 +38,7 @@ scope UkrposhtaSendingProof:
 
   # 1. Sending proof is legally binding if it is registered/valuable mail,
   # has a correctly stamped and signed Form 107 inventory sheet, and the 
-  # receipt names the correct unit or TRSS.
+  # receipt names the correct unit or TRSS (ПКМУ № 270, Пункт 8, 17, 32).
   label sending_proof_yes exception default_sending_proof
   definition is_sending_proof_legally_binding under condition
     is_registered_or_valuable_mail and
@@ -46,7 +53,8 @@ scope UkrposhtaSendingProof:
   definition is_sending_proof_legally_binding equals false
 
   # 2. Delivery proof is legally binding if the tracking system (ШПІ) 
-  # shows the mail is delivered and a signature was obtained at destination.
+  # shows the mail is delivered and a signature was obtained at destination 
+  # (ПКМУ № 270, Пункт 2(13)).
   label delivery_proof_yes exception default_delivery_proof
   definition is_delivery_proof_legally_binding under condition
     has_13_digit_tracking_number and
