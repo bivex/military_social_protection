@@ -620,6 +620,55 @@ run_scope "FastDischargeFlow" "{
   \"command_discharge_processing_days\": 1
 }"
 
+# ============================================================================
+# UkrposhtaSendingProof — CMU Resolution No. 270 Tests
+# ============================================================================
+
+echo ""
+echo "═══ UP Case 1: Fully Compliant Postal Proof ═══"
+echo "   Expected: overall_proof_compliant = true, is_sending_proof_legally_binding = true, is_delivery_proof_legally_binding = true"
+run_scope "UkrposhtaSendingProof" "{
+  \"is_registered_or_valuable_mail\": true,
+  \"has_blank_form_107_inventory\": true,
+  \"inventory_completed_in_duplicate\": true,
+  \"inventory_stamped_and_signed_by_operator\": true,
+  \"receipt_issued_by_operator\": true,
+  \"receipt_specifies_correct_recipient\": true,
+  \"has_13_digit_tracking_number\": true,
+  \"tracking_status_delivered\": true,
+  \"delivery_signature_obtained\": true
+}"
+
+echo ""
+echo "═══ UP Case 2: Missing Inventory (No Form 107) ═══"
+echo "   Expected: overall_proof_compliant = false, is_sending_proof_legally_binding = false, is_delivery_proof_legally_binding = true"
+run_scope "UkrposhtaSendingProof" "{
+  \"is_registered_or_valuable_mail\": true,
+  \"has_blank_form_107_inventory\": false,
+  \"inventory_completed_in_duplicate\": false,
+  \"inventory_stamped_and_signed_by_operator\": false,
+  \"receipt_issued_by_operator\": true,
+  \"receipt_specifies_correct_recipient\": true,
+  \"has_13_digit_tracking_number\": true,
+  \"tracking_status_delivered\": true,
+  \"delivery_signature_obtained\": true
+}"
+
+echo ""
+echo "═══ UP Case 3: Delivered but wrong recipient ═══"
+echo "   Expected: overall_proof_compliant = false, is_sending_proof_legally_binding = false"
+run_scope "UkrposhtaSendingProof" "{
+  \"is_registered_or_valuable_mail\": true,
+  \"has_blank_form_107_inventory\": true,
+  \"inventory_completed_in_duplicate\": true,
+  \"inventory_stamped_and_signed_by_operator\": true,
+  \"receipt_issued_by_operator\": true,
+  \"receipt_specifies_correct_recipient\": false,
+  \"has_13_digit_tracking_number\": true,
+  \"tracking_status_delivered\": true,
+  \"delivery_signature_obtained\": true
+}"
+
 echo ""
 echo "═══════════════════════════════════════"
 echo "  Готово. Всі scope-и перевірені."

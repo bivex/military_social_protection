@@ -1,0 +1,69 @@
+# Ukrposhta Sending Proof Verification (ПКМУ № 270)
+#
+# Models the legal requirements of Cabinet of Ministers Resolution No. 270 
+# ("Правила надання послуг поштового зв'язку") to determine if a postal mailing 
+# constitutes legally binding proof of document delivery.
+
+```catala
+declaration scope UkrposhtaSendingProof:
+  # ---- Inputs ----
+  # Para 19: Only registered (рекомендований) or valuable (з оголошеною цінністю) 
+  # mail is tracked and receipted.
+  input is_registered_or_valuable_mail content boolean
+  # Para 58, 59: Inventory description (опис вкладення) Form 107
+  input has_blank_form_107_inventory content boolean
+  input inventory_completed_in_duplicate content boolean
+  input inventory_stamped_and_signed_by_operator content boolean
+  # Receipt/чек confirming the transaction
+  input receipt_issued_by_operator content boolean
+  input receipt_specifies_correct_recipient content boolean
+  # 13-digit barcode tracker (ШПІ)
+  input has_13_digit_tracking_number content boolean
+  input tracking_status_delivered content boolean
+  input delivery_signature_obtained content boolean
+
+  # ---- Outputs ----
+  output is_sending_proof_legally_binding content boolean
+  output is_delivery_proof_legally_binding content boolean
+  output overall_proof_compliant content boolean
+
+scope UkrposhtaSendingProof:
+
+  # 1. Sending proof is legally binding if it is registered/valuable mail,
+  # has a correctly stamped and signed Form 107 inventory sheet, and the 
+  # receipt names the correct unit or TRSS.
+  label sending_proof_yes exception default_sending_proof
+  definition is_sending_proof_legally_binding under condition
+    is_registered_or_valuable_mail and
+    has_blank_form_107_inventory and
+    inventory_completed_in_duplicate and
+    inventory_stamped_and_signed_by_operator and
+    receipt_issued_by_operator and
+    receipt_specifies_correct_recipient
+    consequence equals true
+
+  label default_sending_proof
+  definition is_sending_proof_legally_binding equals false
+
+  # 2. Delivery proof is legally binding if the tracking system (ШПІ) 
+  # shows the mail is delivered and a signature was obtained at destination.
+  label delivery_proof_yes exception default_delivery_proof
+  definition is_delivery_proof_legally_binding under condition
+    has_13_digit_tracking_number and
+    tracking_status_delivered and
+    delivery_signature_obtained
+    consequence equals true
+
+  label default_delivery_proof
+  definition is_delivery_proof_legally_binding equals false
+
+  # 3. Overall compliance with CMU Resolution 270
+  label overall_proof_yes exception default_overall_proof
+  definition overall_proof_compliant under condition
+    is_sending_proof_legally_binding and
+    is_delivery_proof_legally_binding
+    consequence equals true
+
+  label default_overall_proof
+  definition overall_proof_compliant equals false
+```
