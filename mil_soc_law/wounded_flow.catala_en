@@ -1,0 +1,135 @@
+# Wounded Warrior Flow Specification
+
+```catala
+declaration enumeration VLKCausalRelationship:
+  -- ProtectionOfMotherland
+  -- ExecutionOfDuties
+  -- PassageOfService
+  -- NonServiceRelated
+  -- NoVlkCausalYet
+
+declaration enumeration VLKFitness:
+  -- Fit
+  -- TemporarilyUnfit
+  -- FitWithRestrictions
+  -- UnfitExcluded
+  -- NoVlkFitnessYet
+
+declaration enumeration DisabilityGroup:
+  -- Group_I
+  -- Group_II
+  -- Group_III
+  -- NoDisability
+
+declaration enumeration WoundedAction:
+  -- NotifyUnit
+  -- RequestCertificateOfCircumstances
+  -- UndergoVlk
+  -- UndergoEkopfo
+  -- ClaimBenefits
+  -- ReturnToService
+  -- ProcessDischarge
+  -- NoActionRequired
+
+declaration scope WoundedWarriorFlow:
+  input is_combat_injury content YesNo
+  input has_form_100 content YesNo
+  input unit_notified_immediately content YesNo
+  input has_certificate_of_circumstances content YesNo
+  input vlk_conducted content YesNo
+  input vlk_causal_relationship content VLKCausalRelationship
+  input vlk_fitness content VLKFitness
+  input ekopfo_conducted content YesNo
+  input ekopfo_disability_group content DisabilityGroup
+  input ekopfo_loss_of_capacity_pct content integer
+  input benefits_claimed content YesNo
+  output risk_of_awol content YesNo
+  output next_required_action content WoundedAction
+  output is_eligible_for_100k_remuneration content YesNo
+  output is_eligible_for_ogd content YesNo
+  output is_eligible_for_disability_status content YesNo
+  output is_eligible_for_discharge content YesNo
+
+scope WoundedWarriorFlow:
+  label awol_risk_cond exception default_risk_of_awol
+  definition risk_of_awol under condition
+    unit_notified_immediately = No and is_combat_injury = Yes
+    consequence equals Yes
+
+  label default_risk_of_awol
+  definition risk_of_awol equals No
+
+  label action_notify_unit exception action_request_cert
+  definition next_required_action under condition
+    unit_notified_immediately = No
+    consequence equals NotifyUnit
+
+  label action_request_cert exception action_undergo_vlk
+  definition next_required_action under condition
+    has_certificate_of_circumstances = No
+    consequence equals RequestCertificateOfCircumstances
+
+  label action_undergo_vlk exception action_undergo_vlk_rehab
+  definition next_required_action under condition
+    vlk_conducted = No or vlk_fitness = NoVlkFitnessYet
+    consequence equals UndergoVlk
+
+  label action_undergo_vlk_rehab exception action_undergo_ekopfo
+  definition next_required_action under condition
+    vlk_fitness = TemporarilyUnfit
+    consequence equals UndergoVlk
+
+  label action_undergo_ekopfo exception action_claim_benefits
+  definition next_required_action under condition
+    ekopfo_conducted = No and (vlk_fitness = FitWithRestrictions or vlk_fitness = UnfitExcluded)
+    consequence equals UndergoEkopfo
+
+  label action_claim_benefits exception action_process_discharge
+  definition next_required_action under condition
+    benefits_claimed = No and (ekopfo_conducted = Yes or vlk_causal_relationship = ProtectionOfMotherland)
+    consequence equals ClaimBenefits
+
+  label action_process_discharge exception default_action
+  definition next_required_action under condition
+    vlk_fitness = UnfitExcluded
+    consequence equals ProcessDischarge
+
+  label default_action
+  definition next_required_action equals ReturnToService
+
+  label eligible_100k exception default_eligible_100k
+  definition is_eligible_for_100k_remuneration under condition
+    is_combat_injury = Yes and has_form_100 = Yes and
+    (vlk_causal_relationship = ProtectionOfMotherland or vlk_causal_relationship = ExecutionOfDuties)
+    consequence equals Yes
+
+  label default_eligible_100k
+  definition is_eligible_for_100k_remuneration equals No
+
+  label eligible_ogd exception default_eligible_ogd
+  definition is_eligible_for_ogd under condition
+    ekopfo_conducted = Yes and
+    (not (ekopfo_disability_group = NoDisability) or ekopfo_loss_of_capacity_pct > 0)
+    consequence equals Yes
+
+  label default_eligible_ogd
+  definition is_eligible_for_ogd equals No
+
+  label eligible_disability_status exception default_eligible_disability_status
+  definition is_eligible_for_disability_status under condition
+    ekopfo_conducted = Yes and
+    not (ekopfo_disability_group = NoDisability) and
+    (vlk_causal_relationship = ProtectionOfMotherland or vlk_causal_relationship = ExecutionOfDuties)
+    consequence equals Yes
+
+  label default_eligible_disability_status
+  definition is_eligible_for_disability_status equals No
+
+  label eligible_discharge exception default_eligible_discharge
+  definition is_eligible_for_discharge under condition
+    vlk_fitness = UnfitExcluded or not (ekopfo_disability_group = NoDisability)
+    consequence equals Yes
+
+  label default_eligible_discharge
+  definition is_eligible_for_discharge equals No
+```

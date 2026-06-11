@@ -257,7 +257,89 @@ run_scope "OneTimePaymentAmounts" "{
   \"per_family_member_payment_rate\": 0
 }"
 
+# 13. WoundedWarriorFlow Tests
+echo ""
+echo "═══ WoundedWarriorFlow: Case 1 (New combat injury, not notified, no docs) ═══"
+run_scope "WoundedWarriorFlow" "{
+  \"is_combat_injury\": \"Yes\",
+  \"has_form_100\": \"No\",
+  \"unit_notified_immediately\": \"No\",
+  \"has_certificate_of_circumstances\": \"No\",
+  \"vlk_conducted\": \"No\",
+  \"vlk_causal_relationship\": \"NoVlkCausalYet\",
+  \"vlk_fitness\": \"NoVlkFitnessYet\",
+  \"ekopfo_conducted\": \"No\",
+  \"ekopfo_disability_group\": \"NoDisability\",
+  \"ekopfo_loss_of_capacity_pct\": 0,
+  \"benefits_claimed\": \"No\"
+}"
+
+echo ""
+echo "═══ WoundedWarriorFlow: Case 2 (Combat injury, notified, no certificate) ═══"
+run_scope "WoundedWarriorFlow" "{
+  \"is_combat_injury\": \"Yes\",
+  \"has_form_100\": \"Yes\",
+  \"unit_notified_immediately\": \"Yes\",
+  \"has_certificate_of_circumstances\": \"No\",
+  \"vlk_conducted\": \"No\",
+  \"vlk_causal_relationship\": \"NoVlkCausalYet\",
+  \"vlk_fitness\": \"NoVlkFitnessYet\",
+  \"ekopfo_conducted\": \"No\",
+  \"ekopfo_disability_group\": \"NoDisability\",
+  \"ekopfo_loss_of_capacity_pct\": 0,
+  \"benefits_claimed\": \"No\"
+}"
+
+echo ""
+echo "═══ WoundedWarriorFlow: Case 3 (Combat injury, VLC done, TemporarilyUnfit) ═══"
+run_scope "WoundedWarriorFlow" "{
+  \"is_combat_injury\": \"Yes\",
+  \"has_form_100\": \"Yes\",
+  \"unit_notified_immediately\": \"Yes\",
+  \"has_certificate_of_circumstances\": \"Yes\",
+  \"vlk_conducted\": \"Yes\",
+  \"vlk_causal_relationship\": \"ProtectionOfMotherland\",
+  \"vlk_fitness\": \"TemporarilyUnfit\",
+  \"ekopfo_conducted\": \"No\",
+  \"ekopfo_disability_group\": \"NoDisability\",
+  \"ekopfo_loss_of_capacity_pct\": 0,
+  \"benefits_claimed\": \"No\"
+}"
+
+echo ""
+echo "═══ WoundedWarriorFlow: Case 4 (UnfitExcluded, EKOPFO Group II, benefits NOT claimed) ═══"
+run_scope "WoundedWarriorFlow" "{
+  \"is_combat_injury\": \"Yes\",
+  \"has_form_100\": \"Yes\",
+  \"unit_notified_immediately\": \"Yes\",
+  \"has_certificate_of_circumstances\": \"Yes\",
+  \"vlk_conducted\": \"Yes\",
+  \"vlk_causal_relationship\": \"ProtectionOfMotherland\",
+  \"vlk_fitness\": \"UnfitExcluded\",
+  \"ekopfo_conducted\": \"Yes\",
+  \"ekopfo_disability_group\": \"Group_II\",
+  \"ekopfo_loss_of_capacity_pct\": 60,
+  \"benefits_claimed\": \"No\"
+}"
+
+echo ""
+echo "═══ WoundedWarriorFlow: Case 5 (UnfitExcluded, EKOPFO Group II, benefits claimed) ═══"
+run_scope "WoundedWarriorFlow" "{
+  \"is_combat_injury\": \"Yes\",
+  \"has_form_100\": \"Yes\",
+  \"unit_notified_immediately\": \"Yes\",
+  \"has_certificate_of_circumstances\": \"Yes\",
+  \"vlk_conducted\": \"Yes\",
+  \"vlk_causal_relationship\": \"ProtectionOfMotherland\",
+  \"vlk_fitness\": \"UnfitExcluded\",
+  \"ekopfo_conducted\": \"Yes\",
+  \"ekopfo_disability_group\": \"Group_II\",
+  \"ekopfo_loss_of_capacity_pct\": 60,
+  \"benefits_claimed\": \"Yes\"
+}"
+
 echo ""
 echo "═══════════════════════════════════════"
 echo "  Готово. Всі scope-и перевірені."
 echo "═══════════════════════════════════════"
+
