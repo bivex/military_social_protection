@@ -439,6 +439,187 @@ run_scope "WoundedWarriorFlow" "{
   \"subsistence_minimum_uah\": 3028
 }"
 
+# ============================================================================
+# KMU901Exchange — Cabinet of Ministers Resolution No. 901 Tests
+# ============================================================================
+
+echo ""
+echo "═══ KMU901 Case 1: Standard Compliant Electronic Exchange ═══"
+echo "   Expected: compliance_with_kmu_901 = true, electronic_exchange_mandatory = true, paper_exchange_permitted = false"
+run_scope "KMU901Exchange" "{
+  \"special_period_active\": true,
+  \"system_electronic_document_flow_available\": true,
+  \"no_technical_capability_duration_days\": 0,
+  \"consent_to_personal_data_processing\": true,
+  \"wishes_personal_delivery\": false,
+  \"written_application_submitted\": false,
+  \"list_of_admitted_discharged_sent_within_1_day\": true,
+  \"documents_sent_not_later_than_discharge_day\": true,
+  \"unit_processed_documents_within_1_day\": true,
+  \"trss_processed_documents_within_1_day\": true,
+  \"paper_copies_have_electronic_mark_and_reg_number\": false
+}"
+
+echo ""
+echo "═══ KMU901 Case 2: Outage Fallback to Paper/Personal Delivery (Compliant) ═══"
+echo "   Expected: compliance_with_kmu_901 = true, electronic_exchange_mandatory = false, paper_exchange_permitted = true, personal_delivery_authorized = true, hospital_must_notify_target_of_discharge = true"
+run_scope "KMU901Exchange" "{
+  \"special_period_active\": true,
+  \"system_electronic_document_flow_available\": true,
+  \"no_technical_capability_duration_days\": 3,
+  \"consent_to_personal_data_processing\": true,
+  \"wishes_personal_delivery\": true,
+  \"written_application_submitted\": true,
+  \"list_of_admitted_discharged_sent_within_1_day\": true,
+  \"documents_sent_not_later_than_discharge_day\": true,
+  \"unit_processed_documents_within_1_day\": true,
+  \"trss_processed_documents_within_1_day\": true,
+  \"paper_copies_have_electronic_mark_and_reg_number\": false
+}"
+
+echo ""
+echo "═══ KMU901 Case 3: Non-compliant Electronic Exchange (Unit delay) ═══"
+echo "   Expected: compliance_with_kmu_901 = false, electronic_exchange_mandatory = true"
+run_scope "KMU901Exchange" "{
+  \"special_period_active\": true,
+  \"system_electronic_document_flow_available\": true,
+  \"no_technical_capability_duration_days\": 0,
+  \"consent_to_personal_data_processing\": true,
+  \"wishes_personal_delivery\": false,
+  \"written_application_submitted\": false,
+  \"list_of_admitted_discharged_sent_within_1_day\": true,
+  \"documents_sent_not_later_than_discharge_day\": true,
+  \"unit_processed_documents_within_1_day\": false,
+  \"trss_processed_documents_within_1_day\": true,
+  \"paper_copies_have_electronic_mark_and_reg_number\": false
+}"
+
+echo ""
+echo "═══ KMU901 Case 4: Non-compliant Personal Delivery (No application) ═══"
+echo "   Expected: compliance_with_kmu_901 = false, personal_delivery_authorized = false"
+run_scope "KMU901Exchange" "{
+  \"special_period_active\": true,
+  \"system_electronic_document_flow_available\": true,
+  \"no_technical_capability_duration_days\": 2,
+  \"consent_to_personal_data_processing\": true,
+  \"wishes_personal_delivery\": true,
+  \"written_application_submitted\": false,
+  \"list_of_admitted_discharged_sent_within_1_day\": true,
+  \"documents_sent_not_later_than_discharge_day\": true,
+  \"unit_processed_documents_within_1_day\": true,
+  \"trss_processed_documents_within_1_day\": true,
+  \"paper_copies_have_electronic_mark_and_reg_number\": false
+}"
+
+# ============================================================================
+# FastDischargeFlow — Maximum Pressure Discharge Flow Tests
+# ============================================================================
+
+echo ""
+echo "═══ FD Case 1: Day 1 Wounded (No steps taken) ═══"
+echo "   Expected: risk_of_awol = true, next_critical_step = StepNotifyUnit, action_notify_unit = true"
+run_scope "FastDischargeFlow" "{
+  \"is_wounded\": true,
+  \"unit_notified_in_writing\": false,
+  \"notification_proof_held\": false,
+  \"certificate_requested\": false,
+  \"certificate_obtained\": false,
+  \"certificate_processing_days\": 0,
+  \"vlk_conducted\": false,
+  \"vlk_fitness\": \"NoVlkFitnessYet\",
+  \"vlk_is_objectively_wrong\": false,
+  \"ekopfo_conducted\": false,
+  \"ekopfo_disability_established\": false,
+  \"discharge_report_submitted\": false,
+  \"discharge_report_proof_held\": false,
+  \"command_discharge_order_issued\": false,
+  \"command_discharge_processing_days\": 0
+}"
+
+echo ""
+echo "═══ FD Case 2: Unit delays Form 5 certificate (Escalation) ═══"
+echo "   Expected: action_escalate_certificate = true, next_critical_step = StepAwaitCertificateOrEscalate"
+run_scope "FastDischargeFlow" "{
+  \"is_wounded\": true,
+  \"unit_notified_in_writing\": true,
+  \"notification_proof_held\": true,
+  \"certificate_requested\": true,
+  \"certificate_obtained\": false,
+  \"certificate_processing_days\": 5,
+  \"vlk_conducted\": false,
+  \"vlk_fitness\": \"NoVlkFitnessYet\",
+  \"vlk_is_objectively_wrong\": false,
+  \"ekopfo_conducted\": false,
+  \"ekopfo_disability_established\": false,
+  \"discharge_report_submitted\": false,
+  \"discharge_report_proof_held\": false,
+  \"command_discharge_order_issued\": false,
+  \"command_discharge_processing_days\": 0
+}"
+
+echo ""
+echo "═══ FD Case 3: Wrong VLK fitness decision (Appeal) ═══"
+echo "   Expected: action_appeal_vlk = true, next_critical_step = StepAppealVlk"
+run_scope "FastDischargeFlow" "{
+  \"is_wounded\": true,
+  \"unit_notified_in_writing\": true,
+  \"notification_proof_held\": true,
+  \"certificate_requested\": true,
+  \"certificate_obtained\": true,
+  \"certificate_processing_days\": 1,
+  \"vlk_conducted\": true,
+  \"vlk_fitness\": \"FitWithRestrictions\",
+  \"vlk_is_objectively_wrong\": true,
+  \"ekopfo_conducted\": false,
+  \"ekopfo_disability_established\": false,
+  \"discharge_report_submitted\": false,
+  \"discharge_report_proof_held\": false,
+  \"command_discharge_order_issued\": false,
+  \"command_discharge_processing_days\": 0
+}"
+
+echo ""
+echo "═══ FD Case 4: Commander delays discharge order (Escalation) ═══"
+echo "   Expected: is_eligible_for_discharge = true, action_escalate_discharge_order = true, next_critical_step = StepEscalateDischargeOrder"
+run_scope "FastDischargeFlow" "{
+  \"is_wounded\": true,
+  \"unit_notified_in_writing\": true,
+  \"notification_proof_held\": true,
+  \"certificate_requested\": true,
+  \"certificate_obtained\": true,
+  \"certificate_processing_days\": 1,
+  \"vlk_conducted\": true,
+  \"vlk_fitness\": \"UnfitExcluded\",
+  \"vlk_is_objectively_wrong\": false,
+  \"ekopfo_conducted\": false,
+  \"ekopfo_disability_established\": false,
+  \"discharge_report_submitted\": true,
+  \"discharge_report_proof_held\": true,
+  \"command_discharge_order_issued\": false,
+  \"command_discharge_processing_days\": 4
+}"
+
+echo ""
+echo "═══ FD Case 5: Discharged successfully ═══"
+echo "   Expected: is_eligible_for_discharge = true, next_critical_step = StepDischargedSuccessfully"
+run_scope "FastDischargeFlow" "{
+  \"is_wounded\": true,
+  \"unit_notified_in_writing\": true,
+  \"notification_proof_held\": true,
+  \"certificate_requested\": true,
+  \"certificate_obtained\": true,
+  \"certificate_processing_days\": 1,
+  \"vlk_conducted\": true,
+  \"vlk_fitness\": \"UnfitExcluded\",
+  \"vlk_is_objectively_wrong\": false,
+  \"ekopfo_conducted\": false,
+  \"ekopfo_disability_established\": false,
+  \"discharge_report_submitted\": true,
+  \"discharge_report_proof_held\": true,
+  \"command_discharge_order_issued\": true,
+  \"command_discharge_processing_days\": 1
+}"
+
 echo ""
 echo "═══════════════════════════════════════"
 echo "  Готово. Всі scope-и перевірені."

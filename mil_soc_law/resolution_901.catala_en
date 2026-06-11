@@ -1,0 +1,119 @@
+# Cabinet of Ministers Resolution No. 901
+# Special Period Document Exchange Regulation (Постанова КМУ № 901)
+#
+# Regulates the official exchange of medical and related documents between
+# healthcare facilities, military units, and TRSS (ТЦК та СП) via SEDO.
+
+```catala
+declaration scope KMU901Exchange:
+  # ---- Inputs ----
+  input special_period_active content boolean
+  input system_electronic_document_flow_available content boolean
+  input no_technical_capability_duration_days content integer
+  input consent_to_personal_data_processing content boolean
+  input wishes_personal_delivery content boolean
+  input written_application_submitted content boolean
+
+  # Action-level inputs for compliance
+  input list_of_admitted_discharged_sent_within_1_day content boolean
+  input documents_sent_not_later_than_discharge_day content boolean
+  input unit_processed_documents_within_1_day content boolean
+  input trss_processed_documents_within_1_day content boolean
+  input paper_copies_have_electronic_mark_and_reg_number content boolean
+
+  # ---- Outputs ----
+  output electronic_exchange_mandatory content boolean
+  output paper_exchange_permitted content boolean
+  output personal_delivery_authorized content boolean
+  output hospital_must_notify_target_of_discharge content boolean
+  output paper_copies_require_electronic_stamps content boolean
+  output compliance_with_kmu_901 content boolean
+
+  # Deadlines (constants in days)
+  output unit_processing_deadline_days content integer
+  output trss_processing_deadline_days content integer
+  output hospital_list_sending_deadline_days content integer
+
+scope KMU901Exchange:
+
+  # 1. Electronic Exchange is mandatory when special period is active,
+  # systems are available, and there are no prolonged technical outages.
+  label electronic_mandatory_yes exception default_electronic_mandatory
+  definition electronic_exchange_mandatory under condition
+    special_period_active and
+    system_electronic_document_flow_available and
+    no_technical_capability_duration_days <= 1
+    consequence equals true
+
+  label default_electronic_mandatory
+  definition electronic_exchange_mandatory equals false
+
+  # 2. Paper exchange is permitted if special period is active and either
+  # systems are unavailable or there's a prolonged technical capability outage.
+  label paper_permitted_yes exception default_paper_permitted
+  definition paper_exchange_permitted under condition
+    special_period_active and
+    (not system_electronic_document_flow_available or
+     no_technical_capability_duration_days > 1)
+    consequence equals true
+
+  label default_paper_permitted
+  definition paper_exchange_permitted equals false
+
+  # 3. Personal delivery of paper documents by the soldier is authorized
+  # (Section 7) if the special period is active, they consent to personal data
+  # processing, submit a written application, and either wish to do so or
+  # there is a system outage.
+  label personal_authorized_yes exception default_personal_authorized
+  definition personal_delivery_authorized under condition
+    special_period_active and
+    consent_to_personal_data_processing and
+    written_application_submitted and
+    (wishes_personal_delivery or paper_exchange_permitted)
+    consequence equals true
+
+  label default_personal_authorized
+  definition personal_delivery_authorized equals false
+
+  # 4. Hospital must notify unit/TRSS about discharge and documents handed over
+  # if the soldier personally retrieved the documents (Section 7).
+  label notify_discharge_yes exception default_notify_discharge
+  definition hospital_must_notify_target_of_discharge under condition
+    personal_delivery_authorized
+    consequence equals true
+
+  label default_notify_discharge
+  definition hospital_must_notify_target_of_discharge equals false
+
+  # 5. Paper copies given to soldier must have SEDO stamps, date, and reg number
+  # if electronic exchange was used (Section 8).
+  label require_stamps_yes exception default_require_stamps
+  definition paper_copies_require_electronic_stamps under condition
+    electronic_exchange_mandatory
+    consequence equals true
+
+  label default_require_stamps
+  definition paper_copies_require_electronic_stamps equals false
+
+  # 6. Processing Deadlines (in days)
+  definition unit_processing_deadline_days equals 1
+  definition trss_processing_deadline_days equals 1
+  definition hospital_list_sending_deadline_days equals 1
+
+  # 7. Compliance with KMU 901
+  label compliant_yes exception default_compliant
+  definition compliance_with_kmu_901 under condition
+    special_period_active and
+    list_of_admitted_discharged_sent_within_1_day and
+    documents_sent_not_later_than_discharge_day and
+    unit_processed_documents_within_1_day and
+    trss_processed_documents_within_1_day and
+    # Special conditions for personal delivery / copy requests:
+    (not electronic_exchange_mandatory or not wishes_personal_delivery or
+     (written_application_submitted and paper_copies_have_electronic_mark_and_reg_number)) and
+    (not wishes_personal_delivery or written_application_submitted)
+    consequence equals true
+
+  label default_compliant
+  definition compliance_with_kmu_901 equals false
+```

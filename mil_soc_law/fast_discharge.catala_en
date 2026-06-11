@@ -1,0 +1,183 @@
+# Fast Discharge / Dismissal Procedure (Maximum Pressure Flow)
+#
+# Models the logical priority steps for a wounded servicemember to obtain a discharge 
+# from service as quickly as possible, utilizing the escalation rules of Resolution 901.
+
+```catala
+declaration enumeration DischargeStep:
+  -- StepNotifyUnit
+  -- StepRequestCertificate
+  -- StepAwaitCertificateOrEscalate
+  -- StepUndergoVlk
+  -- StepAppealVlk
+  -- StepUndergoEkopfo
+  -- StepSubmitDischargeReport
+  -- StepEscalateDischargeOrder
+  -- StepDischargedSuccessfully
+
+declaration scope FastDischargeFlow:
+  # ---- Inputs ----
+  input is_wounded content boolean
+  input unit_notified_in_writing content boolean
+  input notification_proof_held content boolean
+  
+  input certificate_requested content boolean
+  input certificate_obtained content boolean
+  input certificate_processing_days content integer
+  
+  input vlk_conducted content boolean
+  input vlk_fitness content VLKFitness
+  input vlk_is_objectively_wrong content boolean
+  
+  input ekopfo_conducted content boolean
+  input ekopfo_disability_established content boolean
+  
+  input discharge_report_submitted content boolean
+  input discharge_report_proof_held content boolean
+  input command_discharge_order_issued content boolean
+  input command_discharge_processing_days content integer
+
+  # ---- Outputs ----
+  output risk_of_awol content boolean
+  output is_eligible_for_discharge content boolean
+  output next_critical_step content DischargeStep
+
+  # Action-level alerts for maximum pressure
+  output action_notify_unit content boolean
+  output action_request_certificate content boolean
+  output action_escalate_certificate content boolean
+  output action_undergo_vlk content boolean
+  output action_appeal_vlk content boolean
+  output action_undergo_ekopfo content boolean
+  output action_submit_discharge_report content boolean
+  output action_escalate_discharge_order content boolean
+
+scope FastDischargeFlow:
+
+  # 1. AWOL Risk: true if wounded but unit not informed in writing with proof.
+  label awol_risk_yes exception default_awol_risk
+  definition risk_of_awol under condition
+    is_wounded and (not unit_notified_in_writing or not notification_proof_held)
+    consequence equals true
+
+  label default_awol_risk
+  definition risk_of_awol equals false
+
+  # 2. Discharge Eligibility: UnfitExcluded or has established disability group.
+  label eligible_yes exception default_eligible
+  definition is_eligible_for_discharge under condition
+    vlk_fitness = UnfitExcluded or ekopfo_disability_established
+    consequence equals true
+
+  label default_eligible
+  definition is_eligible_for_discharge equals false
+
+  # 3. Action Flags
+  label action_notify_unit_yes exception default_action_notify_unit
+  definition action_notify_unit under condition
+    not unit_notified_in_writing or not notification_proof_held
+    consequence equals true
+
+  label default_action_notify_unit
+  definition action_notify_unit equals false
+
+  label action_request_certificate_yes exception default_action_request_certificate
+  definition action_request_certificate under condition
+    unit_notified_in_writing and not certificate_requested
+    consequence equals true
+
+  label default_action_request_certificate
+  definition action_request_certificate equals false
+
+  label action_escalate_certificate_yes exception default_action_escalate_certificate
+  definition action_escalate_certificate under condition
+    certificate_requested and not certificate_obtained and certificate_processing_days > 1
+    consequence equals true
+
+  label default_action_escalate_certificate
+  definition action_escalate_certificate equals false
+
+  label action_undergo_vlk_yes exception default_action_undergo_vlk
+  definition action_undergo_vlk under condition
+    unit_notified_in_writing and not vlk_conducted
+    consequence equals true
+
+  label default_action_undergo_vlk
+  definition action_undergo_vlk equals false
+
+  label action_appeal_vlk_yes exception default_action_appeal_vlk
+  definition action_appeal_vlk under condition
+    vlk_conducted and vlk_is_objectively_wrong
+    consequence equals true
+
+  label default_action_appeal_vlk
+  definition action_appeal_vlk equals false
+
+  label action_undergo_ekopfo_yes exception default_action_undergo_ekopfo
+  definition action_undergo_ekopfo under condition
+    vlk_conducted and not (vlk_fitness = UnfitExcluded) and not ekopfo_conducted
+    consequence equals true
+
+  label default_action_undergo_ekopfo
+  definition action_undergo_ekopfo equals false
+
+  label action_submit_discharge_report_yes exception default_action_submit_discharge_report
+  definition action_submit_discharge_report under condition
+    is_eligible_for_discharge and not discharge_report_submitted
+    consequence equals true
+
+  label default_action_submit_discharge_report
+  definition action_submit_discharge_report equals false
+
+  label action_escalate_discharge_order_yes exception default_action_escalate_discharge_order
+  definition action_escalate_discharge_order under condition
+    discharge_report_submitted and not command_discharge_order_issued and command_discharge_processing_days > 1
+    consequence equals true
+
+  label default_action_escalate_discharge_order
+  definition action_escalate_discharge_order equals false
+
+  # 4. Next Critical Step priority evaluation
+  label step_notify exception step_request_cert
+  definition next_critical_step under condition
+    action_notify_unit
+    consequence equals StepNotifyUnit
+
+  label step_request_cert exception step_escalate_cert
+  definition next_critical_step under condition
+    action_request_certificate
+    consequence equals StepRequestCertificate
+
+  label step_escalate_cert exception step_vlk
+  definition next_critical_step under condition
+    action_escalate_certificate or (certificate_requested and not certificate_obtained)
+    consequence equals StepAwaitCertificateOrEscalate
+
+  label step_vlk exception step_appeal
+  definition next_critical_step under condition
+    action_undergo_vlk
+    consequence equals StepUndergoVlk
+
+  label step_appeal exception step_ekopfo
+  definition next_critical_step under condition
+    action_appeal_vlk
+    consequence equals StepAppealVlk
+
+  label step_ekopfo exception step_submit_report
+  definition next_critical_step under condition
+    action_undergo_ekopfo
+    consequence equals StepUndergoEkopfo
+
+  label step_submit_report exception step_escalate_order
+  definition next_critical_step under condition
+    action_submit_discharge_report
+    consequence equals StepSubmitDischargeReport
+
+  label step_escalate_order exception step_done
+  definition next_critical_step under condition
+    action_escalate_discharge_order or (discharge_report_submitted and not command_discharge_order_issued)
+    consequence equals StepEscalateDischargeOrder
+
+  label step_done
+  definition next_critical_step equals StepDischargedSuccessfully
+```
