@@ -257,85 +257,186 @@ run_scope "OneTimePaymentAmounts" "{
   \"per_family_member_payment_rate\": 0
 }"
 
-# 13. WoundedWarriorFlow Tests
+# ============================================================================
+# WoundedWarriorFlow — Parallel Track Tests
+# Tests cover legally significant scenarios, not just the happy path.
+# PM (subsistence minimum) 2025 = 3028 UAH for OGD calculations.
+# ============================================================================
+
+WWF_BASE='"is_combat_injury": true,
+  "form_100_has_critical_errors": false,
+  "unit_notified_in_writing": false,
+  "notification_proof_held": false,
+  "certificate_requested": false,
+  "certificate_obtained": false,
+  "certificate_delayed_or_refused": false,
+  "disqualifying_circumstance": false,
+  "vlk_conducted": false,
+  "vlk_causal_relationship": "NoVlkCausalYet",
+  "vlk_fitness": "NoVlkFitnessYet",
+  "vlk_severe_wound_confirmed": false,
+  "ekopfo_conducted": false,
+  "ekopfo_disability_group": "NoDisability",
+  "ekopfo_loss_of_capacity_pct": 0,
+  "commander_order_100k_issued": false,
+  "ogd_claimed": false,
+  "subsistence_minimum_uah": 3028'
+
 echo ""
-echo "═══ WoundedWarriorFlow: Case 1 (New combat injury, not notified, no docs) ═══"
+echo "═══ WW Case 1: День 1 — бойове поранення, жодних дій не вжито ═══"
+echo "   Очікується: AWOL ризик=true, дія notify_unit=true, дія request_cert=true,"
+echo "   дія get_vlk_referral=true, OGD=0"
 run_scope "WoundedWarriorFlow" "{
-  \"is_combat_injury\": \"Yes\",
-  \"has_form_100\": \"No\",
-  \"unit_notified_immediately\": \"No\",
-  \"has_certificate_of_circumstances\": \"No\",
-  \"vlk_conducted\": \"No\",
+  $WWF_BASE
+}"
+
+echo ""
+echo "═══ WW Case 2: Повідомлення є, довідки немає, ВЛК іде паралельно ═══"
+echo "   Очікується: AWOL ризик=false, request_cert=true, get_vlk_referral=true"
+echo "   (Tracks A, B, C всі активні одночасно)"
+run_scope "WoundedWarriorFlow" "{
+  \"is_combat_injury\": true,
+  \"form_100_has_critical_errors\": false,
+  \"unit_notified_in_writing\": true,
+  \"notification_proof_held\": true,
+  \"certificate_requested\": false,
+  \"certificate_obtained\": false,
+  \"certificate_delayed_or_refused\": false,
+  \"disqualifying_circumstance\": false,
+  \"vlk_conducted\": false,
   \"vlk_causal_relationship\": \"NoVlkCausalYet\",
   \"vlk_fitness\": \"NoVlkFitnessYet\",
-  \"ekopfo_conducted\": \"No\",
+  \"vlk_severe_wound_confirmed\": false,
+  \"ekopfo_conducted\": false,
   \"ekopfo_disability_group\": \"NoDisability\",
   \"ekopfo_loss_of_capacity_pct\": 0,
-  \"benefits_claimed\": \"No\"
+  \"commander_order_100k_issued\": false,
+  \"ogd_claimed\": false,
+  \"subsistence_minimum_uah\": 3028
 }"
 
 echo ""
-echo "═══ WoundedWarriorFlow: Case 2 (Combat injury, notified, no certificate) ═══"
+echo "═══ WW Case 3: Підрозділ затягує довідку — ескалація ═══"
+echo "   Очікується: action_escalate_certificate=true, risk_of_causal_link_degradation=false (ВЛК ще не було)"
 run_scope "WoundedWarriorFlow" "{
-  \"is_combat_injury\": \"Yes\",
-  \"has_form_100\": \"Yes\",
-  \"unit_notified_immediately\": \"Yes\",
-  \"has_certificate_of_circumstances\": \"No\",
-  \"vlk_conducted\": \"No\",
+  \"is_combat_injury\": true,
+  \"form_100_has_critical_errors\": false,
+  \"unit_notified_in_writing\": true,
+  \"notification_proof_held\": true,
+  \"certificate_requested\": true,
+  \"certificate_obtained\": false,
+  \"certificate_delayed_or_refused\": true,
+  \"disqualifying_circumstance\": false,
+  \"vlk_conducted\": false,
   \"vlk_causal_relationship\": \"NoVlkCausalYet\",
   \"vlk_fitness\": \"NoVlkFitnessYet\",
-  \"ekopfo_conducted\": \"No\",
+  \"vlk_severe_wound_confirmed\": false,
+  \"ekopfo_conducted\": false,
   \"ekopfo_disability_group\": \"NoDisability\",
   \"ekopfo_loss_of_capacity_pct\": 0,
-  \"benefits_claimed\": \"No\"
+  \"commander_order_100k_issued\": false,
+  \"ogd_claimed\": false,
+  \"subsistence_minimum_uah\": 3028
 }"
 
 echo ""
-echo "═══ WoundedWarriorFlow: Case 3 (Combat injury, VLC done, TemporarilyUnfit) ═══"
+echo "═══ WW Case 4: ВЛК зробили без довідки → неправильний причинний зв'язок ═══"
+echo "   КРИТИЧНИЙ СЦЕНАРІЙ: risk_of_causal_link_degradation=true"
+echo "   ВЛК присвоїла PassageOfService замість ProtectionOfMotherland."
+echo "   OGD Group I: 120 × PM замість 400 × PM — різниця 847 840 UAH!"
+echo "   Очікується: action_consider_vlk_appeal=true, OGD multiplier=120"
 run_scope "WoundedWarriorFlow" "{
-  \"is_combat_injury\": \"Yes\",
-  \"has_form_100\": \"Yes\",
-  \"unit_notified_immediately\": \"Yes\",
-  \"has_certificate_of_circumstances\": \"Yes\",
-  \"vlk_conducted\": \"Yes\",
+  \"is_combat_injury\": true,
+  \"form_100_has_critical_errors\": false,
+  \"unit_notified_in_writing\": true,
+  \"notification_proof_held\": true,
+  \"certificate_requested\": true,
+  \"certificate_obtained\": true,
+  \"certificate_delayed_or_refused\": false,
+  \"disqualifying_circumstance\": false,
+  \"vlk_conducted\": true,
+  \"vlk_causal_relationship\": \"PassageOfService\",
+  \"vlk_fitness\": \"UnfitExcluded\",
+  \"vlk_severe_wound_confirmed\": true,
+  \"ekopfo_conducted\": true,
+  \"ekopfo_disability_group\": \"Group_I\",
+  \"ekopfo_loss_of_capacity_pct\": 80,
+  \"commander_order_100k_issued\": false,
+  \"ogd_claimed\": false,
+  \"subsistence_minimum_uah\": 3028
+}"
+
+echo ""
+echo "═══ WW Case 5: Повний пакет — ProtectionOfMotherland, Group II ═══"
+echo "   Очікується: OGD multiplier=300, OGD amount=908 400 UAH"
+echo "   is_eligible_for_100k_remuneration=true, is_eligible_for_disability_war_status=true"
+run_scope "WoundedWarriorFlow" "{
+  \"is_combat_injury\": true,
+  \"form_100_has_critical_errors\": false,
+  \"unit_notified_in_writing\": true,
+  \"notification_proof_held\": true,
+  \"certificate_requested\": true,
+  \"certificate_obtained\": true,
+  \"certificate_delayed_or_refused\": false,
+  \"disqualifying_circumstance\": false,
+  \"vlk_conducted\": true,
   \"vlk_causal_relationship\": \"ProtectionOfMotherland\",
-  \"vlk_fitness\": \"TemporarilyUnfit\",
-  \"ekopfo_conducted\": \"No\",
+  \"vlk_fitness\": \"UnfitExcluded\",
+  \"vlk_severe_wound_confirmed\": true,
+  \"ekopfo_conducted\": true,
+  \"ekopfo_disability_group\": \"Group_II\",
+  \"ekopfo_loss_of_capacity_pct\": 60,
+  \"commander_order_100k_issued\": false,
+  \"ogd_claimed\": false,
+  \"subsistence_minimum_uah\": 3028
+}"
+
+echo ""
+echo "═══ WW Case 6: Дискваліфікаційна обставина (стан сп'яніння) — OGD заблоковано ═══"
+echo "   Очікується: is_eligible_for_ogd=false, ogd_multiplier=0, ogd_amount_uah=0"
+run_scope "WoundedWarriorFlow" "{
+  \"is_combat_injury\": true,
+  \"form_100_has_critical_errors\": false,
+  \"unit_notified_in_writing\": true,
+  \"notification_proof_held\": true,
+  \"certificate_requested\": true,
+  \"certificate_obtained\": true,
+  \"certificate_delayed_or_refused\": false,
+  \"disqualifying_circumstance\": true,
+  \"vlk_conducted\": true,
+  \"vlk_causal_relationship\": \"ProtectionOfMotherland\",
+  \"vlk_fitness\": \"FitWithRestrictions\",
+  \"vlk_severe_wound_confirmed\": false,
+  \"ekopfo_conducted\": true,
+  \"ekopfo_disability_group\": \"Group_III\",
+  \"ekopfo_loss_of_capacity_pct\": 30,
+  \"commander_order_100k_issued\": false,
+  \"ogd_claimed\": false,
+  \"subsistence_minimum_uah\": 3028
+}"
+
+echo ""
+echo "═══ WW Case 7: Відсоток втрати без інвалідності (25%) ═══"
+echo "   Очікується: ogd_multiplier=1750 (25 × 70), ogd_amount_uah=5 299 000 UAH"
+run_scope "WoundedWarriorFlow" "{
+  \"is_combat_injury\": true,
+  \"form_100_has_critical_errors\": false,
+  \"unit_notified_in_writing\": true,
+  \"notification_proof_held\": true,
+  \"certificate_requested\": true,
+  \"certificate_obtained\": true,
+  \"certificate_delayed_or_refused\": false,
+  \"disqualifying_circumstance\": false,
+  \"vlk_conducted\": true,
+  \"vlk_causal_relationship\": \"ExecutionOfDuties\",
+  \"vlk_fitness\": \"FitWithRestrictions\",
+  \"vlk_severe_wound_confirmed\": false,
+  \"ekopfo_conducted\": true,
   \"ekopfo_disability_group\": \"NoDisability\",
-  \"ekopfo_loss_of_capacity_pct\": 0,
-  \"benefits_claimed\": \"No\"
-}"
-
-echo ""
-echo "═══ WoundedWarriorFlow: Case 4 (UnfitExcluded, EKOPFO Group II, benefits NOT claimed) ═══"
-run_scope "WoundedWarriorFlow" "{
-  \"is_combat_injury\": \"Yes\",
-  \"has_form_100\": \"Yes\",
-  \"unit_notified_immediately\": \"Yes\",
-  \"has_certificate_of_circumstances\": \"Yes\",
-  \"vlk_conducted\": \"Yes\",
-  \"vlk_causal_relationship\": \"ProtectionOfMotherland\",
-  \"vlk_fitness\": \"UnfitExcluded\",
-  \"ekopfo_conducted\": \"Yes\",
-  \"ekopfo_disability_group\": \"Group_II\",
-  \"ekopfo_loss_of_capacity_pct\": 60,
-  \"benefits_claimed\": \"No\"
-}"
-
-echo ""
-echo "═══ WoundedWarriorFlow: Case 5 (UnfitExcluded, EKOPFO Group II, benefits claimed) ═══"
-run_scope "WoundedWarriorFlow" "{
-  \"is_combat_injury\": \"Yes\",
-  \"has_form_100\": \"Yes\",
-  \"unit_notified_immediately\": \"Yes\",
-  \"has_certificate_of_circumstances\": \"Yes\",
-  \"vlk_conducted\": \"Yes\",
-  \"vlk_causal_relationship\": \"ProtectionOfMotherland\",
-  \"vlk_fitness\": \"UnfitExcluded\",
-  \"ekopfo_conducted\": \"Yes\",
-  \"ekopfo_disability_group\": \"Group_II\",
-  \"ekopfo_loss_of_capacity_pct\": 60,
-  \"benefits_claimed\": \"Yes\"
+  \"ekopfo_loss_of_capacity_pct\": 25,
+  \"commander_order_100k_issued\": false,
+  \"ogd_claimed\": false,
+  \"subsistence_minimum_uah\": 3028
 }"
 
 echo ""
