@@ -394,8 +394,16 @@ scope WoundedWarriorFlow:
   # This is why the Certificate of Circumstances and VLK appeal are critical.
   # ==========================================================================
 
+  # Disqualifying circumstances (intoxication / crime / self-harm / false info)
+  # override all multiplier rules and collapse the OGD to zero.
+  label ogd_mult_disqualified exception ogd_mult_protect_I
+  definition ogd_multiplier under condition
+    disqualifying_circumstance
+    consequence equals 0
+
   label ogd_mult_protect_I exception ogd_mult_protect_II
   definition ogd_multiplier under condition
+    not disqualifying_circumstance and
     (vlk_causal_relationship = ProtectionOfMotherland or
      vlk_causal_relationship = ExecutionOfDuties) and
     ekopfo_disability_group = Group_I
@@ -403,6 +411,7 @@ scope WoundedWarriorFlow:
 
   label ogd_mult_protect_II exception ogd_mult_protect_III
   definition ogd_multiplier under condition
+    not disqualifying_circumstance and
     (vlk_causal_relationship = ProtectionOfMotherland or
      vlk_causal_relationship = ExecutionOfDuties) and
     ekopfo_disability_group = Group_II
@@ -410,6 +419,7 @@ scope WoundedWarriorFlow:
 
   label ogd_mult_protect_III exception ogd_mult_service_I
   definition ogd_multiplier under condition
+    not disqualifying_circumstance and
     (vlk_causal_relationship = ProtectionOfMotherland or
      vlk_causal_relationship = ExecutionOfDuties) and
     ekopfo_disability_group = Group_III
@@ -417,18 +427,21 @@ scope WoundedWarriorFlow:
 
   label ogd_mult_service_I exception ogd_mult_service_II
   definition ogd_multiplier under condition
+    not disqualifying_circumstance and
     vlk_causal_relationship = PassageOfService and
     ekopfo_disability_group = Group_I
     consequence equals 120
 
   label ogd_mult_service_II exception ogd_mult_service_III
   definition ogd_multiplier under condition
+    not disqualifying_circumstance and
     vlk_causal_relationship = PassageOfService and
     ekopfo_disability_group = Group_II
     consequence equals 90
 
   label ogd_mult_service_III exception ogd_mult_pct_loss
   definition ogd_multiplier under condition
+    not disqualifying_circumstance and
     vlk_causal_relationship = PassageOfService and
     ekopfo_disability_group = Group_III
     consequence equals 70
@@ -437,6 +450,7 @@ scope WoundedWarriorFlow:
   # multiplier = percentage × 70 (per-law proportional formula)
   label ogd_mult_pct_loss exception default_ogd_mult
   definition ogd_multiplier under condition
+    not disqualifying_circumstance and
     ekopfo_disability_group = NoDisability and
     ekopfo_loss_of_capacity_pct > 0
     consequence equals ekopfo_loss_of_capacity_pct * 70
