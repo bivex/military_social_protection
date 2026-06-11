@@ -1,4 +1,38 @@
-# Wounded Warrior Flow Specification
+# Wounded Warrior Flow — Parallel Tracks Model
+#
+# Legal basis:
+#   Закон 2011-12   — Social Protection of Servicemembers
+#   ПКМ 168-2022-п  — Wartime additional remuneration (100k logic)
+#   ПКМ 1338-2024-п — EKOPFO (everyday functioning assessment — інвалідність)
+#   ПКМ 685-2015-п  — "War disability" status (інвалідність внаслідок війни)
+#   Наказ МОЗ z1109-08 — VLK (military medical commission) regulations
+#
+# ARCHITECTURE: Four PARALLEL tracks, not a single linear queue.
+#
+#   Track A — Legal Safety    : written unit notification + proof of receipt
+#                               Must start on day 1. Prevents AWOL classification.
+#
+#   Track B — Documentation   : Certificate of Circumstances (Довідка про обставини)
+#                               Must start on day 1, runs IN PARALLEL with treatment.
+#                               A missing certificate lets VLK use a weaker causal
+#                               formulation → OGD multiplier drops up to 3×.
+#
+#   Track C — Medical / VLK   : treatment → VLK referral → VLK examination
+#                               VLK determines (1) causal relationship,
+#                               (2) fitness conclusion, (3) post-treatment needs.
+#
+#   Track D — EKOPFO           : SEQUENTIAL after VLK — only if VLK fitness is
+#                               FitWithRestrictions or UnfitExcluded.
+#                               Determines disability group and/or % capacity loss.
+#
+#   Track E — Benefits         : unlocks incrementally as other tracks complete.
+#                               100k wartime remuneration, OGD, statuses.
+#
+# CAUSAL LINK — the most important legal switch:
+#   ProtectionOfMotherland / ExecutionOfDuties → OGD multiplier: 400×/300×/250×
+#   PassageOfService                           → OGD multiplier: 120×/90×/70×
+#   (A wrong causal link = up to 3× smaller OGD payment.
+#    The Certificate of Circumstances is the key document that prevents this.)
 
 ```catala
 declaration enumeration VLKCausalRelationship:
@@ -21,115 +55,395 @@ declaration enumeration DisabilityGroup:
   -- Group_III
   -- NoDisability
 
-declaration enumeration WoundedAction:
-  -- NotifyUnit
-  -- RequestCertificateOfCircumstances
-  -- UndergoVlk
-  -- UndergoEkopfo
-  -- ClaimBenefits
-  -- ReturnToService
-  -- ProcessDischarge
-  -- NoActionRequired
-
 declaration scope WoundedWarriorFlow:
-  input is_combat_injury content YesNo
-  input has_form_100 content YesNo
-  input unit_notified_immediately content YesNo
-  input has_certificate_of_circumstances content YesNo
-  input vlk_conducted content YesNo
+
+  # ---- Injury facts ----
+  input is_combat_injury content boolean
+  # Form 100: primary combat medical evacuation record.
+  # Critical errors here (wrong name, unit, date, "unknown circumstances")
+  # break document matching downstream.
+  input form_100_has_critical_errors content boolean
+
+  # ---- Track A: Legal Safety ----
+  # A single oral agreement is legally worthless.
+  # Written notification + held proof of receipt = the minimum safe baseline.
+  input unit_notified_in_writing content boolean
+  input notification_proof_held content boolean
+
+  # ---- Track B: Certificate of Circumstances ----
+  # (Довідка про обставини поранення/травми/контузії/каліцтва)
+  # Start requesting this on day 1 — parallel to treatment.
+  # It reinforces the VLK causal link and is required for OGD / war disability status.
+  input certificate_requested content boolean
+  input certificate_obtained content boolean
+  # Unit ignoring or refusing the request → escalation track
+  input certificate_delayed_or_refused content boolean
+  # Disqualifying circumstances: intoxication, crime, intentional self-harm,
+  # false information. These are often captured in the certificate and block OGD.
+  input disqualifying_circumstance content boolean
+
+  # ---- Track C: VLK ----
+  input vlk_conducted content boolean
   input vlk_causal_relationship content VLKCausalRelationship
   input vlk_fitness content VLKFitness
-  input ekopfo_conducted content YesNo
+  # VLK conclusion of "тяжке поранення" (severe wound) is needed for full 100k
+  input vlk_severe_wound_confirmed content boolean
+
+  # ---- Track D: EKOPFO ----
+  input ekopfo_conducted content boolean
   input ekopfo_disability_group content DisabilityGroup
+  # Percentage of loss of working capacity (0 if none established).
+  # Even without a disability group, a non-zero % triggers a proportional OGD.
   input ekopfo_loss_of_capacity_pct content integer
-  input benefits_claimed content YesNo
-  output risk_of_awol content YesNo
-  output next_required_action content WoundedAction
-  output is_eligible_for_100k_remuneration content YesNo
-  output is_eligible_for_ogd content YesNo
-  output is_eligible_for_disability_status content YesNo
-  output is_eligible_for_discharge content YesNo
+
+  # ---- Track E: Benefits ----
+  # 100k wartime remuneration is activated by commander's order.
+  # Without the order, the payment does not start even if the right exists.
+  input commander_order_100k_issued content boolean
+  input ogd_claimed content boolean
+  # Subsistence minimum (прожитковий мінімум) for the relevant year.
+  # 2025 value: 3028 UAH (Закон про держбюджет 4059-20).
+  input subsistence_minimum_uah content money
+
+  # ---- Legal risk flags ----
+  output risk_of_awol content boolean
+  # Missing certificate + weak VLK causal link = financial risk of 3× lower OGD
+  output risk_of_causal_link_degradation content boolean
+
+  # ---- Parallel action flags ----
+  # Multiple of these may be true simultaneously — they are NOT a priority queue.
+  output action_notify_unit content boolean
+  output action_request_certificate content boolean
+  output action_escalate_certificate content boolean
+  output action_get_vlk_referral content boolean
+  # VLK appeal is worth pursuing when the causal link is wrong for a combat wound
+  output action_consider_vlk_appeal content boolean
+  output action_undergo_ekopfo content boolean
+  output action_claim_100k_remuneration content boolean
+  output action_claim_ogd content boolean
+  output action_process_discharge content boolean
+
+  # ---- Eligibility outputs ----
+  output is_eligible_for_100k_remuneration content boolean
+  output is_eligible_for_ogd content boolean
+  output is_eligible_for_discharge content boolean
+  # "Особа з інвалідністю внаслідок війни" (ПКМ 685-2015-п)
+  output is_eligible_for_disability_war_status content boolean
+  # "Учасник бойових дій" status (Закон 3551-12)
+  output is_eligible_for_ubd_status content boolean
+
+  # ---- OGD financial calculation ----
+  # ogd_multiplier × subsistence_minimum_uah = OGD entitlement.
+  # A wrong causal link (PassageOfService vs ProtectionOfMotherland)
+  # can reduce this multiplier from 400 to 120 for Group I — a 3× loss.
+  output ogd_multiplier content integer
+  output ogd_amount_uah content money
+
 
 scope WoundedWarriorFlow:
-  label awol_risk_cond exception default_risk_of_awol
+
+  # ==========================================================================
+  # TRACK A — Legal Safety
+  # ==========================================================================
+  # Risk: being treated as AWOL (СЗЧ) during lawful medical treatment.
+  # Protection requires TWO parallel elements:
+  #   1. Written notification (рапорт / офіційне повідомлення)
+  #   2. Held proof of receipt (відмітка про реєстрацію / поштова квитанція)
+
+  label awol_risk_yes exception default_awol_risk
   definition risk_of_awol under condition
-    unit_notified_immediately = No and is_combat_injury = Yes
-    consequence equals Yes
+    is_combat_injury and
+    (not unit_notified_in_writing or not notification_proof_held)
+    consequence equals true
 
-  label default_risk_of_awol
-  definition risk_of_awol equals No
+  label default_awol_risk
+  definition risk_of_awol equals false
 
-  label action_notify_unit exception action_request_cert
-  definition next_required_action under condition
-    unit_notified_immediately = No
-    consequence equals NotifyUnit
+  label notify_unit_needed exception default_notify_unit
+  definition action_notify_unit under condition
+    not unit_notified_in_writing or not notification_proof_held
+    consequence equals true
 
-  label action_request_cert exception action_undergo_vlk
-  definition next_required_action under condition
-    has_certificate_of_circumstances = No
-    consequence equals RequestCertificateOfCircumstances
+  label default_notify_unit
+  definition action_notify_unit equals false
 
-  label action_undergo_vlk exception action_undergo_vlk_rehab
-  definition next_required_action under condition
-    vlk_conducted = No or vlk_fitness = NoVlkFitnessYet
-    consequence equals UndergoVlk
 
-  label action_undergo_vlk_rehab exception action_undergo_ekopfo
-  definition next_required_action under condition
-    vlk_fitness = TemporarilyUnfit
-    consequence equals UndergoVlk
+  # ==========================================================================
+  # TRACK B — Certificate of Circumstances
+  # ==========================================================================
+  # Causal link degradation risk:
+  # If VLK was conducted but the certificate was not yet obtained and VLK
+  # used a weak causal formulation (PassageOfService or none yet), the
+  # servicemember is at risk of a much lower OGD payment.
 
-  label action_undergo_ekopfo exception action_claim_benefits
-  definition next_required_action under condition
-    ekopfo_conducted = No and (vlk_fitness = FitWithRestrictions or vlk_fitness = UnfitExcluded)
-    consequence equals UndergoEkopfo
+  label cert_risk_yes exception default_cert_risk
+  definition risk_of_causal_link_degradation under condition
+    vlk_conducted and
+    not certificate_obtained and
+    (vlk_causal_relationship = PassageOfService or
+     vlk_causal_relationship = NoVlkCausalYet)
+    consequence equals true
 
-  label action_claim_benefits exception action_process_discharge
-  definition next_required_action under condition
-    benefits_claimed = No and (ekopfo_conducted = Yes or vlk_causal_relationship = ProtectionOfMotherland)
-    consequence equals ClaimBenefits
+  label default_cert_risk
+  definition risk_of_causal_link_degradation equals false
 
-  label action_process_discharge exception default_action
-  definition next_required_action under condition
-    vlk_fitness = UnfitExcluded
-    consequence equals ProcessDischarge
+  label request_cert_needed exception default_request_cert
+  definition action_request_certificate under condition
+    not certificate_requested
+    consequence equals true
 
-  label default_action
-  definition next_required_action equals ReturnToService
+  label default_request_cert
+  definition action_request_certificate equals false
+
+  # Escalation: if unit delays or refuses, move to written complaints,
+  # command escalation, and if necessary — court (незаконна бездіяльність).
+  label escalate_cert_needed exception default_escalate_cert
+  definition action_escalate_certificate under condition
+    certificate_requested and
+    not certificate_obtained and
+    certificate_delayed_or_refused
+    consequence equals true
+
+  label default_escalate_cert
+  definition action_escalate_certificate equals false
+
+
+  # ==========================================================================
+  # TRACK C — VLK
+  # ==========================================================================
+  # VLK referral must be obtained (from the unit, medical institution, or TsKK).
+  # If blocked → written request + proof of receipt, then escalate.
+
+  label vlk_referral_needed exception default_vlk_referral
+  definition action_get_vlk_referral under condition
+    not vlk_conducted
+    consequence equals true
+
+  label default_vlk_referral
+  definition action_get_vlk_referral equals false
+
+  # VLK Appeal:
+  # When VLK assigned PassageOfService for a combat injury despite the
+  # certificate being available, the difference in OGD is typically
+  # 400× vs 120× (Group I) — a 3× financial loss. Appeal is legally available
+  # and well worth pursuing (вища ВЛК → суд).
+
+  label vlk_appeal_yes exception default_vlk_appeal
+  definition action_consider_vlk_appeal under condition
+    vlk_conducted and
+    is_combat_injury and
+    vlk_causal_relationship = PassageOfService and
+    certificate_obtained
+    consequence equals true
+
+  label default_vlk_appeal
+  definition action_consider_vlk_appeal equals false
+
+
+  # ==========================================================================
+  # TRACK D — EKOPFO
+  # ==========================================================================
+  # EKOPFO is triggered ONLY after VLK when fitness conclusion is
+  # FitWithRestrictions or UnfitExcluded.
+  # It determines: disability group (Group I/II/III) and/or % loss of capacity.
+  # Both outputs are needed for the OGD calculation.
+
+  label ekopfo_needed exception default_ekopfo
+  definition action_undergo_ekopfo under condition
+    vlk_conducted and
+    (vlk_fitness = FitWithRestrictions or vlk_fitness = UnfitExcluded) and
+    not ekopfo_conducted
+    consequence equals true
+
+  label default_ekopfo
+  definition action_undergo_ekopfo equals false
+
+
+  # ==========================================================================
+  # TRACK E — Benefits
+  # ==========================================================================
+
+  # --- 100k Additional Wartime Remuneration (ПКМ 168-2022-п) ---
+  # This is a WARTIME SALARY SUPPLEMENT, not the disability lump sum (OGD).
+  # It is activated by a commander's order (наказ командира).
+  # Without the order, the payment never starts — even with a valid right.
+  # VLK confirmation of "тяжке поранення" is required for the full entitlement.
 
   label eligible_100k exception default_eligible_100k
   definition is_eligible_for_100k_remuneration under condition
-    is_combat_injury = Yes and has_form_100 = Yes and
-    (vlk_causal_relationship = ProtectionOfMotherland or vlk_causal_relationship = ExecutionOfDuties)
-    consequence equals Yes
+    is_combat_injury and
+    not form_100_has_critical_errors and
+    (vlk_causal_relationship = ProtectionOfMotherland or
+     vlk_causal_relationship = ExecutionOfDuties) and
+    vlk_severe_wound_confirmed
+    consequence equals true
 
   label default_eligible_100k
-  definition is_eligible_for_100k_remuneration equals No
+  definition is_eligible_for_100k_remuneration equals false
+
+  label claim_100k_needed exception default_claim_100k
+  definition action_claim_100k_remuneration under condition
+    is_eligible_for_100k_remuneration and
+    not commander_order_100k_issued
+    consequence equals true
+
+  label default_claim_100k
+  definition action_claim_100k_remuneration equals false
+
+  # --- OGD: One-Time Cash Payment (одноразова грошова допомога, Закон 2011-12) ---
+  # Triggers: EKOPFO disability group OR non-zero % of capacity loss.
+  # BLOCKED by disqualifying circumstances (intoxication, crime, self-harm,
+  # false information — recorded in the Certificate of Circumstances).
+  # Amount: ogd_multiplier × subsistence_minimum_uah (see OGD calculation below).
 
   label eligible_ogd exception default_eligible_ogd
   definition is_eligible_for_ogd under condition
-    ekopfo_conducted = Yes and
-    (not (ekopfo_disability_group = NoDisability) or ekopfo_loss_of_capacity_pct > 0)
-    consequence equals Yes
+    ekopfo_conducted and
+    not disqualifying_circumstance and
+    (not (ekopfo_disability_group = NoDisability) or
+     ekopfo_loss_of_capacity_pct > 0)
+    consequence equals true
 
   label default_eligible_ogd
-  definition is_eligible_for_ogd equals No
+  definition is_eligible_for_ogd equals false
 
-  label eligible_disability_status exception default_eligible_disability_status
-  definition is_eligible_for_disability_status under condition
-    ekopfo_conducted = Yes and
-    not (ekopfo_disability_group = NoDisability) and
-    (vlk_causal_relationship = ProtectionOfMotherland or vlk_causal_relationship = ExecutionOfDuties)
-    consequence equals Yes
+  label claim_ogd_needed exception default_claim_ogd
+  definition action_claim_ogd under condition
+    is_eligible_for_ogd and not ogd_claimed
+    consequence equals true
 
-  label default_eligible_disability_status
-  definition is_eligible_for_disability_status equals No
+  label default_claim_ogd
+  definition action_claim_ogd equals false
+
+  # --- Discharge ---
+  # VLK "UnfitExcluded" (непридатний з виключенням з військового обліку)
+  # initiates the discharge procedure — a separate documentation package
+  # with TsKK/unit.
+  # EKOPFO-based discharge (via disability group) is a parallel, different track.
 
   label eligible_discharge exception default_eligible_discharge
   definition is_eligible_for_discharge under condition
-    vlk_fitness = UnfitExcluded or not (ekopfo_disability_group = NoDisability)
-    consequence equals Yes
+    vlk_fitness = UnfitExcluded
+    consequence equals true
 
   label default_eligible_discharge
-  definition is_eligible_for_discharge equals No
+  definition is_eligible_for_discharge equals false
+
+  label discharge_needed exception default_discharge_needed
+  definition action_process_discharge under condition
+    vlk_fitness = UnfitExcluded
+    consequence equals true
+
+  label default_discharge_needed
+  definition action_process_discharge equals false
+
+  # --- "Інвалідність внаслідок війни" status (ПКМ 685-2015-п) ---
+  # Requires ALL of:
+  #   1. EKOPFO decision with a disability group established
+  #   2. VLK causal link: ProtectionOfMotherland or ExecutionOfDuties
+  #   3. Certificate of Circumstances (or equivalent evidence of combat cause)
+  #   4. Filing at the social protection authority (орган соцзахисту)
+  # NOTE: after obtaining this status, the UBD certificate is typically held
+  # by the social protection authority — keep personal copies.
+
+  label eligible_war_disability exception default_war_disability
+  definition is_eligible_for_disability_war_status under condition
+    ekopfo_conducted and
+    not (ekopfo_disability_group = NoDisability) and
+    (vlk_causal_relationship = ProtectionOfMotherland or
+     vlk_causal_relationship = ExecutionOfDuties) and
+    certificate_obtained
+    consequence equals true
+
+  label default_war_disability
+  definition is_eligible_for_disability_war_status equals false
+
+  # --- UBD Status (учасник бойових дій, Закон 3551-12) ---
+  # Based on documented direct participation in combat operations.
+  # Granted via commander (during service) or TsKK (after discharge).
+  # Independent of wounding — the wounding establishes that combat occurred.
+
+  label eligible_ubd exception default_ubd
+  definition is_eligible_for_ubd_status under condition
+    is_combat_injury
+    consequence equals true
+
+  label default_ubd
+  definition is_eligible_for_ubd_status equals false
+
+
+  # ==========================================================================
+  # OGD CALCULATION
+  #
+  # OGD = subsistence_minimum_uah ×$ decimal_of_integer ogd_multiplier
+  #
+  # Multiplier matrix (from Закон 2011-12):
+  #
+  #  Causal link              | Group I | Group II | Group III
+  #  ProtectionOfMotherland   |   400×  |   300×   |   250×
+  #  ExecutionOfDuties        |   400×  |   300×   |   250×
+  #  PassageOfService         |   120×  |    90×   |    70×
+  #
+  # Without a disability group (% loss only):
+  #   multiplier ≈ ekopfo_loss_of_capacity_pct × 70
+  #   (e.g. 25% × 70 = 1750 × PM = 52 990 UAH for PM=3028)
+  #
+  # KEY INSIGHT: A wrong VLK causal link (PassageOfService vs
+  # ProtectionOfMotherland) reduces the OGD multiplier from 400 → 120
+  # for Group I — a loss of 280 × 3028 UAH = 847 840 UAH.
+  # This is why the Certificate of Circumstances and VLK appeal are critical.
+  # ==========================================================================
+
+  label ogd_mult_protect_I exception ogd_mult_protect_II
+  definition ogd_multiplier under condition
+    (vlk_causal_relationship = ProtectionOfMotherland or
+     vlk_causal_relationship = ExecutionOfDuties) and
+    ekopfo_disability_group = Group_I
+    consequence equals 400
+
+  label ogd_mult_protect_II exception ogd_mult_protect_III
+  definition ogd_multiplier under condition
+    (vlk_causal_relationship = ProtectionOfMotherland or
+     vlk_causal_relationship = ExecutionOfDuties) and
+    ekopfo_disability_group = Group_II
+    consequence equals 300
+
+  label ogd_mult_protect_III exception ogd_mult_service_I
+  definition ogd_multiplier under condition
+    (vlk_causal_relationship = ProtectionOfMotherland or
+     vlk_causal_relationship = ExecutionOfDuties) and
+    ekopfo_disability_group = Group_III
+    consequence equals 250
+
+  label ogd_mult_service_I exception ogd_mult_service_II
+  definition ogd_multiplier under condition
+    vlk_causal_relationship = PassageOfService and
+    ekopfo_disability_group = Group_I
+    consequence equals 120
+
+  label ogd_mult_service_II exception ogd_mult_service_III
+  definition ogd_multiplier under condition
+    vlk_causal_relationship = PassageOfService and
+    ekopfo_disability_group = Group_II
+    consequence equals 90
+
+  label ogd_mult_service_III exception ogd_mult_pct_loss
+  definition ogd_multiplier under condition
+    vlk_causal_relationship = PassageOfService and
+    ekopfo_disability_group = Group_III
+    consequence equals 70
+
+  # Capacity loss without disability group:
+  # multiplier = percentage × 70 (per-law proportional formula)
+  label ogd_mult_pct_loss exception default_ogd_mult
+  definition ogd_multiplier under condition
+    ekopfo_disability_group = NoDisability and
+    ekopfo_loss_of_capacity_pct > 0
+    consequence equals ekopfo_loss_of_capacity_pct * 70
+
+  label default_ogd_mult
+  definition ogd_multiplier equals 0
+
+  definition ogd_amount_uah equals
+    subsistence_minimum_uah *$ decimal_of_integer ogd_multiplier
 ```
