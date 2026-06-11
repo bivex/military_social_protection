@@ -375,7 +375,7 @@ scope WoundedWarriorFlow:
   # ==========================================================================
   # OGD CALCULATION
   #
-  # OGD = subsistence_minimum_uah ×$ decimal_of_integer ogd_multiplier
+  # OGD = subsistence_minimum_uah × ogd_multiplier
   #
   # Multiplier matrix (from Закон 2011-12):
   #
@@ -445,5 +445,5 @@ scope WoundedWarriorFlow:
   definition ogd_multiplier equals 0
 
   definition ogd_amount_uah equals
-    subsistence_minimum_uah *$ decimal_of_integer ogd_multiplier
+    subsistence_minimum_uah * ogd_multiplier
 ```
